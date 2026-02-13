@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIMO SHOP | Neon Evolution</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { 
+            --neon-blue: #00d2ff; 
+            --neon-pink: #bc13fe; 
+            --glass: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body { 
+            margin: 0; background: #050508; color: white; 
+            font-family: 'Inter', sans-serif; overflow-x: hidden;
+            background-size: cover; background-position: center; 
+            background-attachment: fixed;
+        }
+
+        .bg-neon {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.15) 0%, transparent 45%),
+                        radial-gradient(circle at 85% 85%, rgba(188, 19, 254, 0.15) 0%, transparent 45%);
+            z-index: -1;
+        }
+
+        #loader { 
+            position: fixed; width: 100%; height: 100vh; background: #000; 
+            display: flex; justify-content: center; align-items: center; z-index: 9999; 
+        }
+
+        .page { display: none; padding: 20px; animation: fadeIn 0.6s ease-out; max-width: 800px; margin: auto; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        header { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; padding-top: 20px; position: relative; }
+        .back-btn { 
+            position: absolute; left: 0; top: 20px; 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
+            color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer;
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
+        }
+
+        .k-logo { 
+            width: 70px; height: 70px; border-radius: 20px; overflow: hidden; 
+            border: 2px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+        }
+        .k-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .shop-title { margin-left: 20px; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-style: italic; }
+
+        .slider-wrapper {
+            padding: 8px; border-radius: 30px; border: 2px solid;
+            border-image: linear-gradient(to right, var(--neon-blue), var(--neon-pink)) 1;
+            margin-bottom: 40px; box-shadow: 0 0 30px rgba(188, 19, 254, 0.2);
+            background: rgba(0,0,0,0.5);
+        }
+        .slider-container { width: 100%; aspect-ratio: 16/9; border-radius: 22px; overflow: hidden; position: relative; }
+        .slides { display: flex; width: 300%; height: 100%; transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
+        .slide { width: 100%; height: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+        .slide-overlay { width: 100%; padding: 25px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); font-weight: bold; }
+
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        
+        .main-card { 
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); 
+            padding: 15px; border-radius: 24px; display: flex; flex-direction: column;
+            justify-content: space-between; backdrop-filter: blur(10px); transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        
+        .card-info h3 { margin: 0 0 5px 0; font-size: 16px; font-weight: bold; }
+        .card-info p { margin: 0; font-size: 11px; color: #aaa; }
+        
+        .buy-pill { 
+            margin-top: 15px; background: linear-gradient(90deg, #00c6ff, #0072ff); 
+            border: none; color: white; padding: 10px; border-radius: 50px; 
+            font-size: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase;
+        }
+
+        .price-item { 
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 12px; border-left: 4px solid var(--neon-blue);
+        }
+        .order-input-box { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        .admin-input { width: 100%; padding: 15px; margin-bottom: 12px; background: #000; border: 1px solid #444; color: white; border-radius: 15px; box-sizing: border-box; }
+
+        .acc-post { background: var(--glass); border-radius: 28px; padding: 18px; border: 1px solid var(--card-border); margin-bottom: 25px; position: relative; }
+        .preview-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 20px; }
+        .sold-badge-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; border-radius: 28px; z-index: 5; }
+        .sold-stamp { border: 5px solid #ff0055; color: #ff0055; font-size: 2.5rem; font-weight: 900; padding: 15px; transform: rotate(-15deg); }
+
+        .adm-tabs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 25px; padding: 5px; }
+        .adm-tab { background: #111; padding: 12px 20px; border-radius: 15px; cursor: pointer; white-space: nowrap; border: 1px solid #333; }
+        .adm-tab.active { background: var(--neon-blue); color: black; font-weight: bold; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 2000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .detail-wrapper { max-width: 600px; margin: auto; display: flex; flex-direction: column; align-items: center; }
+        .detail-img-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
+        .detail-img { width: 100%; max-width: 500px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+    <div class="bg-neon"></div>
+    <div id="loader"><h1 style="color:var(--neon-blue); font-style:italic;">KIMO EVOLUTION...</h1></div>
+
+    <div id="main-page" class="page active-page">
+        <header>
+            <div class="k-logo"><img id="display-logo" src=""></div>
+            <div class="shop-title" onclick="secretAdmin()">KIMO SHOP</div>
+        </header>
+        
+        <div class="slider-wrapper">
+            <div class="slider-container">
+                <div class="slides" id="slide-track">
+                    <div id="slide0" class="slide"><div class="slide-overlay" id="st0"></div></div>
+                    <div id="slide1" class="slide"><div class="slide-overlay" id="st1"></div></div>
+                    <div id="slide2" class="slide"><div class="slide-overlay" id="st2"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <div class="main-card" onclick="nav('mlbb-page')">
+                <div class="card-info"><h3>MLBB Diamonds</h3><p>Fast & Reliable Delivery</p></div>
+                <button class="buy-pill">BUY NOW</button>
+            </div>
+            <div class="main-card" onclick="nav('heartopia-page')">
+                <div class="card-info"><h3>Heartopia</h3><p>Instant Coin Topup</p></div>
+                <button class="buy-pill" style="background: linear-gradient(90deg, #bc13fe, #7a00ff);">BUY NOW</button>
+            </div>
+            <div class="main-card" onclick="nav('pubg-page')">
+                <div class="card-info"><h3>PUBG Mobile</h3><p>Global UC Instant</p></div>
+                <button class="buy-pill">BUY NOW</button>
+            </div>
+            <div class="main-card" onclick="nav('tg-page')">
+                <div class="card-info"><h3>Telegram Premium</h3><p>1 Month / 1 Year Gift</p></div>
+                <button class="buy-pill" style="background: linear-gradient(90deg, #bc13fe, #7a00ff);">BUY NOW</button>
+            </div>
+        </div>
+
+        <div class="main-card" style="flex-direction: row; align-items: center; margin-bottom: 40px;" onclick="nav('acc-page')">
+            <div class="card-info"><h3>Accounts Shop</h3><p>View Available Premium Stock</p></div>
+            <button class="buy-pill" style="margin-top:0; padding: 12px 25px;">VIEW STOCK</button>
+        </div>
+    </div>
+
+    <div id="mlbb-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">MLBB</div></header>
+        <div class="order-input-box">
+            <input type="text" id="mlbb-id" class="admin-input" placeholder="Player ID">
+            <input type="text" id="mlbb-sr" class="admin-input" placeholder="Server ID">
+            <input type="number" id="mlbb-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
+        </div>
+        <div id="list-mlbb"></div>
+    </div>
+
+    <div id="pubg-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">PUBG</div></header>
+        <div class="order-input-box">
+            <input type="text" id="pubg-id" class="admin-input" placeholder="Character ID">
+            <input type="number" id="pubg-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
+        </div>
+        <div id="list-pubg"></div>
+    </div>
+
+    <div id="heartopia-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">HEARTOPIA</div></header>
+        <div class="order-input-box">
+            <input type="text" id="heartopia-id" class="admin-input" placeholder="Game ID">
+            <input type="number" id="heartopia-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
+        </div>
+        <div id="list-heartopia"></div>
+    </div>
+
+    <div id="tg-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">TELEGRAM</div></header>
+        <div class="order-input-box">
+            <input type="text" id="tg-id" class="admin-input" placeholder="Username/Phone">
+            <input type="number" id="tg-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
+        </div>
+        <div id="list-tg"></div>
+    </div>
+
+    <div id="acc-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">ACCOUNTS</div></header>
+        <div id="list-acc"></div>
+    </div>
+
+    <div id="admin-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')">← EXIT</button><div class="shop-title">ADMIN</div></header>
+        <div class="adm-tabs">
+            <div class="adm-tab active" onclick="switchAdm(this,'prices')">Pricing</div>
+            <div class="adm-tab" onclick="switchAdm(this,'acc')">Post Acc</div>
+            <div class="adm-tab" onclick="switchAdm(this,'manage')">Manage Sold</div>
+        </div>
+
+        <div id="adm-prices" class="adm-sec">
+            <div class="adm-tabs">
+                <div class="adm-tab" onclick="currCat='mlbb';renderPriceEdit()">MLBB</div>
+                <div class="adm-tab" onclick="currCat='pubg';renderPriceEdit()">PUBG</div>
+                <div class="adm-tab" onclick="currCat='heartopia';renderPriceEdit()">Heart</div>
+                <div class="adm-tab" onclick="currCat='tg';renderPriceEdit()">TG</div>
+            </div>
+            <div id="price-edit-area"></div>
+            <button class="buy-pill" onclick="addItem()">+ Add Item</button>
+        </div>
+
+        <div id="adm-acc" class="adm-sec" style="display:none">
+            <input type="text" id="a-title" class="admin-input" placeholder="Acc Name">
+            <textarea id="a-desc" class="admin-input" placeholder="Details" style="height:100px;"></textarea>
+            <input type="file" id="a-imgs" class="admin-input" multiple>
+            <button class="buy-pill" style="width:100%" onclick="postAcc()">Publish Account</button>
+        </div>
+
+        <div id="adm-manage" class="adm-sec" style="display:none">
+            <div id="admin-sold-list"></div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="modal">
+        <div class="detail-wrapper" id="detail-content"></div>
+        <div class="detail-wrapper">
+            <button class="buy-pill" style="width:100%; margin-top:20px; background:#333;" onclick="closeModal()">CLOSE DETAILS</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Supabase Configuration ---
+        const SUPABASE_URL = 'https://wfvcurswhruefkgtrvcl.supabase.co';
+        const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmN1cnN3aHJ1ZWZrZ3RydmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3NzQsImV4cCI6MjA4NjU2NDc3NH0.eOR7yiXZi4VK5VtdmN8sh-wZ1loVLVh3EHm7LlRHS5c';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let db = { mlbb: [], pubg: [], heartopia: [], tg: [], accs: [] };
+        let currCat = 'mlbb'; 
+        let count = 0;
+
+        // --- Core Functions ---
+        function nav(id) { 
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); 
+            document.getElementById(id).classList.add('active-page'); 
+            window.scrollTo(0,0); 
+        }
+
+        function secretAdmin() { 
+            count++; 
+            if(count==5){ 
+                count=0; 
+                let pass = prompt("Enter Admin Password:");
+                if(pass === "123456") { 
+                    nav('admin-page'); 
+                    renderPriceEdit(); 
+                    renderAdminAcc();
+                } else {
+                    alert("Wrong Password!");
+                }
+            } 
+            setTimeout(()=>count=0, 2000); 
+        }
+
+        async function fetchCloudDB() {
+            try {
+                const { data, error } = await _supabase.from('kimo_store').select('*');
+                if (data) {
+                    data.forEach(row => { db[row.category] = row.content; });
+                    renderMain();
+                }
+            } catch (e) { console.error("Fetch Error:", e); }
+        }
+
+        async function saveDB() {
+            const categories = ['mlbb', 'pubg', 'heartopia', 'tg', 'accs'];
+            for (let cat of categories) {
+                await _supabase.from('kimo_store').upsert({ category: cat, content: db[cat] });
+            }
+            renderMain();
+        }
+
+        function renderMain() {
+            ['mlbb','pubg','heartopia','tg'].forEach(c => {
+                const list = document.getElementById('list-'+c);
+                if(list) list.innerHTML = db[c].map(i => `
+                    <div class="price-item">
+                        <span>${i[0]}</span>
+                        <button class="buy-pill" style="margin:0;" onclick="sendOrder('${c.toUpperCase()}', '${i[0]}', '${i[1]}')">${i[1]} MMK</button>
+                    </div>`).join('');
+            });
+
+            document.getElementById('list-acc').innerHTML = db.accs.map(a => `
+                <div class="acc-post" onclick="viewDetails(${a.id})">
+                    <div class="sold-badge-overlay" style="display:${a.sold?'flex':'none'}"><div class="sold-stamp">SOLD</div></div>
+                    <img src="${a.imgs[0]}" class="preview-img">
+                    <div style="padding:10px;"><h3>${a.t}</h3><p style="color:var(--neon-blue);">View Details</p></div>
+                </div>`).join('');
+        }
+
+        // --- Admin Functions ---
+        function switchAdm(el,sec) {
+            document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+            document.querySelectorAll('.adm-sec').forEach(s=>s.style.display='none'); document.getElementById('adm-'+sec).style.display='block';
+        }
+
+        function renderPriceEdit() {
+            document.getElementById('price-edit-area').innerHTML = `<h4>Editing: ${currCat.toUpperCase()}</h4>` + db[currCat].map((item,i) => `
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input class="admin-input" value="${item[0]}" onchange="db['${currCat}'][${i}][0]=this.value; saveDB()">
+                    <input class="admin-input" value="${item[1]}" onchange="db['${currCat}'][${i}][1]=this.value; saveDB()">
+                    <button onclick="db['${currCat}'].splice(${i},1); saveDB(); renderPriceEdit()" style="background:red; color:white; border:none; border-radius:10px; width:40px;">X</button>
+                </div>`).join('');
+        }
+
+        function addItem() { db[currCat].push(["Item","0"]); renderPriceEdit(); saveDB(); }
+
+        async function procImg(file) { return new Promise(res => { const r = new FileReader(); r.readAsDataURL(file); r.onload = (e) => res(e.target.result); }); }
+
+        async function postAcc() {
+            const title = document.getElementById('a-title').value;
+            const desc = document.getElementById('a-desc').value;
+            const fs = document.getElementById('a-imgs').files;
+            if(!title || fs.length === 0) return alert("Title and Image required!");
+            
+            let imgs = []; for(let f of fs) imgs.push(await procImg(f));
+            db.accs.unshift({ id:Date.now(), t:title, d:desc, imgs, sold:false });
+            await saveDB(); alert("Published!"); location.reload();
+        }
+
+        function renderAdminAcc() {
+            document.getElementById('admin-sold-list').innerHTML = db.accs.map(a => `
+                <div style="display:flex; justify-content:space-between; padding:10px; background:#111; margin-bottom:5px; border-radius:10px;">
+                    <span>${a.t}</span>
+                    <button onclick="doSold(${a.id})" style="background:red; border:none; border-radius:5px; color:white; padding:5px 10px;">SOLD</button>
+                </div>`).join('');
+        }
+
+        function doSold(id) { db.accs = db.accs.map(a => a.id === id ? {...a, sold:true} : a); saveDB(); renderAdminAcc(); }
+
+        function viewDetails(id) {
+            const a = db.accs.find(x => x.id === id);
+            document.getElementById('detail-content').innerHTML = `
+                <h2 style="color:var(--neon-blue);">${a.t}</h2>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; white-space:pre-wrap;">${a.d}</div>
+                <div class="detail-img-container">${a.imgs.map(i => `<img src="${i}" class="detail-img">`).join('')}</div>
+                <button class="buy-pill" style="width:100%;" onclick="sendOrder('ACCOUNT', '${a.t}', 'Chat for Price')">INQUIRE ON TELEGRAM</button>
+            `;
+            document.getElementById('detail-modal').style.display='block';
+        }
+        function closeModal() { document.getElementById('detail-modal').style.display='none'; }
+
+        function sendOrder(cat, item, price) {
+            let details = ""; let p5 = "";
+            if(cat !== 'ACCOUNT') {
+                const prefix = cat.toLowerCase() === 'telegram' ? 'tg' : cat.toLowerCase();
+                const idVal = document.getElementById(prefix + '-id').value;
+                const p5Val = document.getElementById(prefix + '-pay5').value;
+                if(!idVal || !p5Val) return alert("Please fill ID and Transaction 5 Digits!");
+                details = (cat==='MLBB') ? `ID: ${idVal} (${document.getElementById('mlbb-sr').value})` : `ID: ${idVal}`;
+                p5 = p5Val;
+            }
+            const text = `🛒 **NEW ORDER**\n\n🔹 Item: ${item} (${cat})\n🔹 Price: ${price} MMK\n🔹 ${details}\n🔹 Last 5 Digits: ${p5}`;
+            window.open(`https://t.me/Kimo_Max?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        // --- App Init ---
+        window.onload = () => { 
+            setTimeout(() => { 
+                document.getElementById('loader').style.display='none'; 
+                fetchCloudDB(); 
+                startSlider(); 
+            }, 1500); 
+        };
+
+        function startSlider() { 
+            let i=0; 
+            setInterval(()=>{ 
+                i=(i+1)%3; 
+                const track = document.getElementById('slide-track');
+                if(track) track.style.transform=`translateX(-${i*33.333}%)`; 
+            }, 5000); 
+        }
+    </script>
+</body>
+</html>
