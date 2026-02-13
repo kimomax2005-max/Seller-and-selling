@@ -80,6 +80,10 @@
             font-size: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase;
         }
 
+        .pay-guide { background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        .pay-guide h4 { margin: 0 0 10px 0; color: var(--neon-blue); font-size: 13px; }
+        .pay-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+
         .price-item { 
             background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; 
             display: flex; justify-content: space-between; align-items: center; 
@@ -148,8 +152,17 @@
         </div>
     </div>
 
+    <template id="pay-template">
+        <div class="pay-guide">
+            <h4>💳 ငွေလွဲရန် အကောင့်များ</h4>
+            <div class="pay-row"><span class="p1-name"></span>: <b class="p1-num"></b></div>
+            <div class="pay-row"><span class="p2-name"></span>: <b class="p2-num"></b></div>
+        </div>
+    </template>
+
     <div id="mlbb-page" class="page">
         <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">MLBB</div></header>
+        <div id="mlbb-pay-box"></div>
         <div class="order-input-box">
             <input type="text" id="mlbb-id" class="admin-input" placeholder="Player ID">
             <input type="text" id="mlbb-sr" class="admin-input" placeholder="Server ID">
@@ -160,6 +173,7 @@
 
     <div id="pubg-page" class="page">
         <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">PUBG</div></header>
+        <div id="pubg-pay-box"></div>
         <div class="order-input-box">
             <input type="text" id="pubg-id" class="admin-input" placeholder="Character ID">
             <input type="number" id="pubg-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
@@ -169,6 +183,7 @@
 
     <div id="heartopia-page" class="page">
         <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">HEARTOPIA</div></header>
+        <div id="heartopia-pay-box"></div>
         <div class="order-input-box">
             <input type="text" id="heartopia-id" class="admin-input" placeholder="Game ID">
             <input type="number" id="heartopia-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
@@ -178,6 +193,7 @@
 
     <div id="tg-page" class="page">
         <header><button class="back-btn" onclick="nav('main-page')">← BACK</button><div class="shop-title">TELEGRAM</div></header>
+        <div id="tg-pay-box"></div>
         <div class="order-input-box">
             <input type="text" id="tg-id" class="admin-input" placeholder="Username/Phone">
             <input type="number" id="tg-pay5" class="admin-input" placeholder="ငွေလွဲနောက်ဆုံး ၅ လုံး">
@@ -194,8 +210,8 @@
         <header><button class="back-btn" onclick="nav('main-page')">← EXIT</button><div class="shop-title">ADMIN</div></header>
         <div class="adm-tabs">
             <div class="adm-tab active" onclick="switchAdm(this,'prices')">Pricing</div>
+            <div class="adm-tab" onclick="switchAdm(this,'visuals')">Visuals & Pay</div>
             <div class="adm-tab" onclick="switchAdm(this,'acc')">Post Acc</div>
-            <div class="adm-tab" onclick="switchAdm(this,'manage')">Manage Sold</div>
         </div>
 
         <div id="adm-prices" class="adm-sec">
@@ -209,15 +225,29 @@
             <button class="buy-pill" onclick="addItem()">+ Add Item</button>
         </div>
 
+        <div id="adm-visuals" class="adm-sec" style="display:none">
+            <h4 style="color:var(--neon-blue);">Pay Channels & Settings</h4>
+            <input type="text" id="adm-tg-user" class="admin-input" placeholder="Telegram Username (Kimo_Max)">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <input type="text" id="adm-p1-m" class="admin-input" placeholder="Pay 1 Name">
+                <input type="text" id="adm-p1-n" class="admin-input" placeholder="Pay 1 Num">
+                <input type="text" id="adm-p2-m" class="admin-input" placeholder="Pay 2 Name">
+                <input type="text" id="adm-p2-n" class="admin-input" placeholder="Pay 2 Num">
+            </div>
+            <h4 style="color:var(--neon-blue);">Images & Slides</h4>
+            <p>Logo: <input type="file" id="adm-f-logo" class="admin-input"></p>
+            <p>Slide 1 Image: <input type="file" id="adm-f-s0" class="admin-input"> Text: <input type="text" id="adm-t-s0" class="admin-input"></p>
+            <p>Slide 2 Image: <input type="file" id="adm-f-s1" class="admin-input"> Text: <input type="text" id="adm-t-s1" class="admin-input"></p>
+            <p>Slide 3 Image: <input type="file" id="adm-f-s2" class="admin-input"> Text: <input type="text" id="adm-t-s2" class="admin-input"></p>
+            <button class="buy-pill" style="width:100%;" onclick="saveVisuals()">Update All Visuals</button>
+        </div>
+
         <div id="adm-acc" class="adm-sec" style="display:none">
             <input type="text" id="a-title" class="admin-input" placeholder="Acc Name">
             <textarea id="a-desc" class="admin-input" placeholder="Details" style="height:100px;"></textarea>
             <input type="file" id="a-imgs" class="admin-input" multiple>
             <button class="buy-pill" style="width:100%" onclick="postAcc()">Publish Account</button>
-        </div>
-
-        <div id="adm-manage" class="adm-sec" style="display:none">
-            <div id="admin-sold-list"></div>
+            <div id="admin-sold-list" style="margin-top:20px;"></div>
         </div>
     </div>
 
@@ -229,122 +259,103 @@
     </div>
 
     <script>
-        // --- Supabase Configuration ---
         const SUPABASE_URL = 'https://wfvcurswhruefkgtrvcl.supabase.co';
         const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmN1cnN3aHJ1ZWZrZ3RydmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3NzQsImV4cCI6MjA4NjU2NDc3NH0.eOR7yiXZi4VK5VtdmN8sh-wZ1loVLVh3EHm7LlRHS5c';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let db = { mlbb: [], pubg: [], heartopia: [], tg: [], accs: [] };
+        let settings = { tg: 'Kimo_Max', p1m: 'Kpay', p1n: '-', p2m: 'Wave', p2n: '-', logo: '', s0: '', st0: 'Slide 1', s1: '', st1: 'Slide 2', s2: '', st2: 'Slide 3' };
         let currCat = 'mlbb'; 
         let count = 0;
 
-        // --- Core Functions ---
-        function nav(id) { 
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); 
-            document.getElementById(id).classList.add('active-page'); 
-            window.scrollTo(0,0); 
-        }
-
+        function nav(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); document.getElementById(id).classList.add('active-page'); window.scrollTo(0,0); }
+        
         function secretAdmin() { 
-            count++; 
-            if(count==5){ 
-                count=0; 
-                let pass = prompt("Enter Admin Password:");
-                if(pass === "123456") { 
-                    nav('admin-page'); 
-                    renderPriceEdit(); 
-                    renderAdminAcc();
-                } else {
-                    alert("Wrong Password!");
-                }
-            } 
+            count++; if(count==5){ count=0; let pass = prompt("Admin Password:"); if(pass === "123456") { nav('admin-page'); renderPriceEdit(); renderAdminAcc(); loadAdmVisuals(); } } 
             setTimeout(()=>count=0, 2000); 
         }
 
         async function fetchCloudDB() {
-            try {
-                const { data, error } = await _supabase.from('kimo_store').select('*');
-                if (data) {
-                    data.forEach(row => { db[row.category] = row.content; });
-                    renderMain();
-                }
-            } catch (e) { console.error("Fetch Error:", e); }
+            const { data: store } = await _supabase.from('kimo_store').select('*');
+            if (store) store.forEach(row => { db[row.category] = row.content; });
+
+            // 'settings' ကို kimo_store ထဲမှာပဲ id တစ်ခုနဲ့ သိမ်းထားပါမယ်
+            const { data: sets } = await _supabase.from('kimo_store').select('content').eq('category', 'site_settings').single();
+            if (sets) settings = sets.content;
+            
+            renderMain();
         }
 
         async function saveDB() {
-            const categories = ['mlbb', 'pubg', 'heartopia', 'tg', 'accs'];
-            for (let cat of categories) {
-                await _supabase.from('kimo_store').upsert({ category: cat, content: db[cat] });
-            }
+            const categories = ['mlbb', 'pubg', 'heartopia', 'tg', 'accs', 'site_settings'];
+            const dataToSave = categories.map(cat => ({ category: cat, content: cat === 'site_settings' ? settings : db[cat] }));
+            await _supabase.from('kimo_store').upsert(dataToSave);
             renderMain();
         }
 
         function renderMain() {
             ['mlbb','pubg','heartopia','tg'].forEach(c => {
                 const list = document.getElementById('list-'+c);
-                if(list) list.innerHTML = db[c].map(i => `
-                    <div class="price-item">
-                        <span>${i[0]}</span>
-                        <button class="buy-pill" style="margin:0;" onclick="sendOrder('${c.toUpperCase()}', '${i[0]}', '${i[1]}')">${i[1]} MMK</button>
-                    </div>`).join('');
+                if(list) list.innerHTML = db[c].map(i => `<div class="price-item"><span>${i[0]}</span><button class="buy-pill" style="margin:0;" onclick="sendOrder('${c.toUpperCase()}', '${i[0]}', '${i[1]}')">${i[1]} MMK</button></div>`).join('');
+                
+                const box = document.getElementById(c + '-pay-box');
+                if(box) {
+                    box.innerHTML = document.getElementById('pay-template').innerHTML;
+                    box.querySelector('.p1-name').innerText = settings.p1m; box.querySelector('.p1-num').innerText = settings.p1n;
+                    box.querySelector('.p2-name').innerText = settings.p2m; box.querySelector('.p2-num').innerText = settings.p2n;
+                }
             });
 
-            document.getElementById('list-acc').innerHTML = db.accs.map(a => `
-                <div class="acc-post" onclick="viewDetails(${a.id})">
-                    <div class="sold-badge-overlay" style="display:${a.sold?'flex':'none'}"><div class="sold-stamp">SOLD</div></div>
-                    <img src="${a.imgs[0]}" class="preview-img">
-                    <div style="padding:10px;"><h3>${a.t}</h3><p style="color:var(--neon-blue);">View Details</p></div>
-                </div>`).join('');
+            document.getElementById('list-acc').innerHTML = db.accs.map(a => `<div class="acc-post" onclick="viewDetails(${a.id})"><div class="sold-badge-overlay" style="display:${a.sold?'flex':'none'}"><div class="sold-stamp">SOLD</div></div><img src="${a.imgs[0]}" class="preview-img"><div style="padding:10px;"><h3>${a.t}</h3><p style="color:var(--neon-blue);">View Details</p></div></div>`).join('');
+            
+            if(settings.logo) document.getElementById('display-logo').src = settings.logo;
+            for(let i=0; i<3; i++) {
+                if(settings['s'+i]) document.getElementById('slide'+i).style.backgroundImage = `url(${settings['s'+i]})`;
+                if(settings['st'+i]) document.getElementById('st'+i).innerText = settings['st'+i];
+            }
         }
 
-        // --- Admin Functions ---
-        function switchAdm(el,sec) {
-            document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-            document.querySelectorAll('.adm-sec').forEach(s=>s.style.display='none'); document.getElementById('adm-'+sec).style.display='block';
+        function loadAdmVisuals() {
+            document.getElementById('adm-tg-user').value = settings.tg;
+            document.getElementById('adm-p1-m').value = settings.p1m; document.getElementById('adm-p1-n').value = settings.p1n;
+            document.getElementById('adm-p2-m').value = settings.p2m; document.getElementById('adm-p2-n').value = settings.p2n;
+            for(let i=0; i<3; i++) document.getElementById('adm-t-s'+i).value = settings['st'+i];
         }
 
-        function renderPriceEdit() {
-            document.getElementById('price-edit-area').innerHTML = `<h4>Editing: ${currCat.toUpperCase()}</h4>` + db[currCat].map((item,i) => `
-                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input class="admin-input" value="${item[0]}" onchange="db['${currCat}'][${i}][0]=this.value; saveDB()">
-                    <input class="admin-input" value="${item[1]}" onchange="db['${currCat}'][${i}][1]=this.value; saveDB()">
-                    <button onclick="db['${currCat}'].splice(${i},1); saveDB(); renderPriceEdit()" style="background:red; color:white; border:none; border-radius:10px; width:40px;">X</button>
-                </div>`).join('');
+        async function saveVisuals() {
+            settings.tg = document.getElementById('adm-tg-user').value;
+            settings.p1m = document.getElementById('adm-p1-m').value; settings.p1n = document.getElementById('adm-p1-n').value;
+            settings.p2m = document.getElementById('adm-p2-m').value; settings.p2n = document.getElementById('adm-p2-n').value;
+            
+            const lFile = document.getElementById('adm-f-logo').files[0]; if(lFile) settings.logo = await procImg(lFile);
+            for(let i=0; i<3; i++) {
+                const sFile = document.getElementById('adm-f-s'+i).files[0]; if(sFile) settings['s'+i] = await procImg(sFile);
+                settings['st'+i] = document.getElementById('adm-t-s'+i).value;
+            }
+            await saveDB(); alert("Visuals Updated!");
         }
-
-        function addItem() { db[currCat].push(["Item","0"]); renderPriceEdit(); saveDB(); }
 
         async function procImg(file) { return new Promise(res => { const r = new FileReader(); r.readAsDataURL(file); r.onload = (e) => res(e.target.result); }); }
 
+        function switchAdm(el,sec) { document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.querySelectorAll('.adm-sec').forEach(s=>s.style.display='none'); document.getElementById('adm-'+sec).style.display='block'; }
+        function renderPriceEdit() { document.getElementById('price-edit-area').innerHTML = `<h4>Editing: ${currCat.toUpperCase()}</h4>` + db[currCat].map((item,i) => `<div style="display:flex; gap:10px; margin-bottom:10px;"><input class="admin-input" value="${item[0]}" onchange="db['${currCat}'][${i}][0]=this.value; saveDB()"><input class="admin-input" value="${item[1]}" onchange="db['${currCat}'][${i}][1]=this.value; saveDB()"><button onclick="db['${currCat}'].splice(${i},1); saveDB(); renderPriceEdit()" style="background:red; color:white; border:none; border-radius:10px; width:40px;">X</button></div>`).join(''); }
+        function addItem() { db[currCat].push(["Item","0"]); renderPriceEdit(); saveDB(); }
+
         async function postAcc() {
-            const title = document.getElementById('a-title').value;
-            const desc = document.getElementById('a-desc').value;
-            const fs = document.getElementById('a-imgs').files;
+            const title = document.getElementById('a-title').value; const desc = document.getElementById('a-desc').value; const fs = document.getElementById('a-imgs').files;
             if(!title || fs.length === 0) return alert("Title and Image required!");
-            
             let imgs = []; for(let f of fs) imgs.push(await procImg(f));
             db.accs.unshift({ id:Date.now(), t:title, d:desc, imgs, sold:false });
-            await saveDB(); alert("Published!"); location.reload();
+            await saveDB(); alert("Published!"); renderAdminAcc();
         }
 
-        function renderAdminAcc() {
-            document.getElementById('admin-sold-list').innerHTML = db.accs.map(a => `
-                <div style="display:flex; justify-content:space-between; padding:10px; background:#111; margin-bottom:5px; border-radius:10px;">
-                    <span>${a.t}</span>
-                    <button onclick="doSold(${a.id})" style="background:red; border:none; border-radius:5px; color:white; padding:5px 10px;">SOLD</button>
-                </div>`).join('');
-        }
-
+        function renderAdminAcc() { document.getElementById('admin-sold-list').innerHTML = `<h4>Manage Inventory</h4>` + db.accs.map(a => `<div style="display:flex; justify-content:space-between; padding:10px; background:#111; margin-bottom:5px; border-radius:10px;"><span>${a.t}</span><div><button onclick="doSold(${a.id})" style="background:red; color:white; border:none; padding:5px; border-radius:5px;">SOLD</button> <button onclick="delAcc(${a.id})" style="background:#444; color:white; border:none; padding:5px; border-radius:5px;">DEL</button></div></div>`).join(''); }
         function doSold(id) { db.accs = db.accs.map(a => a.id === id ? {...a, sold:true} : a); saveDB(); renderAdminAcc(); }
+        function delAcc(id) { db.accs = db.accs.filter(a => a.id !== id); saveDB(); renderAdminAcc(); }
 
         function viewDetails(id) {
             const a = db.accs.find(x => x.id === id);
-            document.getElementById('detail-content').innerHTML = `
-                <h2 style="color:var(--neon-blue);">${a.t}</h2>
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; white-space:pre-wrap;">${a.d}</div>
-                <div class="detail-img-container">${a.imgs.map(i => `<img src="${i}" class="detail-img">`).join('')}</div>
-                <button class="buy-pill" style="width:100%;" onclick="sendOrder('ACCOUNT', '${a.t}', 'Chat for Price')">INQUIRE ON TELEGRAM</button>
-            `;
+            document.getElementById('detail-content').innerHTML = `<h2 style="color:var(--neon-blue);">${a.t}</h2><div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; white-space:pre-wrap;">${a.d}</div><div class="detail-img-container">${a.imgs.map(i => `<img src="${i}" class="detail-img">`).join('')}</div><button class="buy-pill" style="width:100%;" onclick="sendOrder('ACCOUNT', '${a.t}', 'Inquire')">INQUIRE ON TELEGRAM</button>`;
             document.getElementById('detail-modal').style.display='block';
         }
         function closeModal() { document.getElementById('detail-modal').style.display='none'; }
@@ -355,31 +366,15 @@
                 const prefix = cat.toLowerCase() === 'telegram' ? 'tg' : cat.toLowerCase();
                 const idVal = document.getElementById(prefix + '-id').value;
                 const p5Val = document.getElementById(prefix + '-pay5').value;
-                if(!idVal || !p5Val) return alert("Please fill ID and Transaction 5 Digits!");
+                if(!idVal || !p5Val) return alert("Fill ID & Transaction 5 Digits!");
                 details = (cat==='MLBB') ? `ID: ${idVal} (${document.getElementById('mlbb-sr').value})` : `ID: ${idVal}`;
                 p5 = p5Val;
             }
-            const text = `🛒 **NEW ORDER**\n\n🔹 Item: ${item} (${cat})\n🔹 Price: ${price} MMK\n🔹 ${details}\n🔹 Last 5 Digits: ${p5}`;
-            window.open(`https://t.me/Kimo_Max?text=${encodeURIComponent(text)}`, '_blank');
+            window.open(`https://t.me/${settings.tg}?text=${encodeURIComponent('🛒 NEW ORDER\nItem: '+item+'\nPrice: '+price+' MMK\n'+details+'\nLast 5 Digits: '+p5)}`, '_blank');
         }
 
-        // --- App Init ---
-        window.onload = () => { 
-            setTimeout(() => { 
-                document.getElementById('loader').style.display='none'; 
-                fetchCloudDB(); 
-                startSlider(); 
-            }, 1500); 
-        };
-
-        function startSlider() { 
-            let i=0; 
-            setInterval(()=>{ 
-                i=(i+1)%3; 
-                const track = document.getElementById('slide-track');
-                if(track) track.style.transform=`translateX(-${i*33.333}%)`; 
-            }, 5000); 
-        }
+        window.onload = () => { setTimeout(() => { document.getElementById('loader').style.display='none'; fetchCloudDB(); startSlider(); }, 1500); };
+        function startSlider() { let i=0; setInterval(()=>{ i=(i+1)%3; const track = document.getElementById('slide-track'); if(track) track.style.transform=`translateX(-${i*33.333}%)`; }, 5000); }
     </script>
 </body>
 </html>
