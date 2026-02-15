@@ -7,311 +7,540 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon-blue: #00d2ff; --neon-pink: #bc13fe; --glass: rgba(255, 255, 255, 0.05); --card-border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; background: #050508; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; background-attachment: fixed; padding-bottom: 80px; }
+        body { margin: 0; background: #050508; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.5s ease; padding-bottom: 80px; }
+        .bg-neon { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(188, 19, 254, 0.15) 0%, transparent 45%); z-index: -1; }
         
-        /* Auth Styles */
-        #auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .auth-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 30px; border-radius: 25px; width: 100%; max-width: 350px; backdrop-filter: blur(15px); text-align: center; }
-        
-        /* Layout Styles */
-        .page { display: none; padding: 20px; max-width: 800px; margin: auto; animation: fadeIn 0.4s ease-out; }
-        .active-page { display: block !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .wallet-card { background: linear-gradient(135deg, rgba(0, 210, 255, 0.15), rgba(188, 19, 254, 0.15)); border: 1px solid var(--neon-blue); border-radius: 25px; padding: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .wallet-card { background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(188, 19, 254, 0.1)); border: 1px solid var(--neon-blue); border-radius: 25px; padding: 20px; margin-bottom: 30px; backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .balance-amount { font-size: 26px; font-weight: 900; color: var(--neon-blue); }
+        .topup-btn { background: var(--neon-blue); color: black; border: none; padding: 12px 20px; border-radius: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* Admin UI */
-        .adm-sec { background: rgba(255,255,255,0.03); border: 1px solid var(--neon-blue); padding: 20px; border-radius: 20px; margin-top: 20px; }
-        .admin-input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #444; color: white; border-radius: 12px; box-sizing: border-box; }
-        .adm-tab-box { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
-        .adm-tab { background: #111; padding: 10px 20px; border-radius: 12px; cursor: pointer; white-space: nowrap; border: 1px solid #333; color: #fff; }
-        .adm-tab.active { background: var(--neon-blue); color: #000; font-weight: bold; }
+        .drawer-btn { position: fixed; right: 20px; top: 25px; z-index: 1000; background: rgba(0,0,0,0.6); border: 1px solid var(--neon-blue); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
+        .drawer-btn span { width: 25px; height: 3px; background: var(--neon-blue); border-radius: 2px; transition: 0.3s; }
 
-        /* Utilities */
-        header { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; margin-top: 20px; }
-        .k-logo { width: 70px; height: 70px; border-radius: 20px; border: 2px solid var(--neon-blue); overflow: hidden; }
+        .drawer { position: fixed; top: 0; right: -310px; width: 290px; height: 100%; background: linear-gradient(165deg, rgba(10, 10, 15, 0.95) 0%, rgba(20, 10, 30, 0.98) 100%); backdrop-filter: blur(25px); z-index: 2000; transition: 0.5s; border-left: 2px solid rgba(0, 210, 255, 0.2); padding: 40px 25px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .drawer.open { right: 0; }
+        .drawer-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; z-index: 1500; }
+        .drawer-item { background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: 18px; margin-bottom: 18px; border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 15px; }
+        
+        #loader { position: fixed; width: 100%; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.6s ease-out; max-width: 800px; margin: auto; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        
+        header { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; padding-top: 20px; position: relative; }
+        .back-btn { position: absolute; left: 0; top: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; font-size: 12px; }
+        .k-logo { width: 70px; height: 70px; border-radius: 20px; overflow: hidden; border: 2px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
         .k-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .shop-title { margin-left: 15px; font-size: 24px; font-weight: 900; color: white; text-transform: uppercase; }
-        .buy-pill { background: linear-gradient(90deg, #00c6ff, #0072ff); border: none; color: white; padding: 12px; border-radius: 50px; cursor: pointer; font-weight: bold; }
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .main-card { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid var(--card-border); cursor: pointer; transition: 0.3s; }
-        .main-card:active { transform: scale(0.95); }
+        .shop-title { margin-left: 20px; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-style: italic; background: linear-gradient(to right, #fff, var(--neon-blue)); -webkit-background-clip: text; color: transparent; }
         
-        /* Drawer Menu */
-        .drawer-btn { position: fixed; right: 20px; top: 20px; z-index: 1000; background: #000; border: 1px solid var(--neon-blue); color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
-        #d-menu { position: fixed; top: 0; right: -300px; width: 260px; height: 100%; background: #0a0a0f; border-left: 1px solid var(--neon-blue); z-index: 2000; transition: 0.4s; padding: 40px 20px; box-sizing: border-box; }
-        #d-menu.open { right: 0; }
+        .slider-wrapper { padding: 8px; border-radius: 30px; border: 2px solid; border-image: linear-gradient(to right, var(--neon-blue), var(--neon-pink)) 1; margin-bottom: 40px; background: rgba(0,0,0,0.5); }
+        .slider-container { width: 100%; aspect-ratio: 16/9; border-radius: 22px; overflow: hidden; position: relative; }
+        .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
+        .slide { width: 100%; height: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
         
-        .price-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .main-card { background: rgba(20, 20, 25, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; align-items: center; backdrop-filter: blur(10px); transition: 0.3s; position: relative; overflow: hidden; height: 220px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .cat-icon-container { width: 100%; height: 140px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); }
+        .cat-icon { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card-bottom { width: 100%; height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.6)); z-index: 2; padding-bottom: 10px; }
+        .main-card h3 { font-size: 16px; text-align: center; margin: 0 0 8px 0; color: #fff; text-shadow: 0 0 5px var(--neon-blue); }
+        .buy-pill { width: 80%; background: linear-gradient(90deg, #00c6ff, #0072ff); border: none; color: white; padding: 8px; border-radius: 50px; font-size: 11px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+        
+        .price-item { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid var(--neon-blue); }
+        .admin-input { width: 100%; padding: 15px; margin-bottom: 12px; background: #000; border: 1px solid #444; color: white; border-radius: 15px; box-sizing: border-box; }
+        .adm-sec { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; border: 1px solid var(--card-border); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 5000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .acc-card { background: #111; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 1px solid #333; }
+        .acc-img { width: 100%; height: 200px; object-fit: cover; }
+        .acc-body { padding: 15px; }
+        .acc-price { color: var(--neon-pink); font-size: 20px; font-weight: bold; }
+        .order-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #333; }
+        .detail-img-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .detail-img-grid img { width: 100%; border-radius: 10px; border: 1px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
+        .fire-badge { position: absolute; top: 0; right: 0; background: linear-gradient(45deg, #ff0000, #ff8800); color: white; padding: 5px 12px; border-bottom-left-radius: 15px; font-size: 10px; font-weight: 900; z-index: 10; animation: burn 0.8s infinite alternate; }
+        @keyframes burn { 0% { box-shadow: 0 0 5px #ff4400; transform: scale(1); } 100% { box-shadow: 0 0 20px #ffaa00; transform: scale(1.05); } }
+        .price-edit-row { display: flex; gap: 5px; margin-bottom: 10px; align-items: center; }
+        .price-edit-row input { flex: 1; padding: 10px; background: #111; border: 1px solid #333; color: white; border-radius: 8px; }
+        .del-btn { background: #ff4444; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .adm-tabs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 25px; padding: 5px; scrollbar-width: none; }
+        .adm-tab { background: #111; padding: 12px 20px; border-radius: 15px; cursor: pointer; white-space: nowrap; border: 1px solid #333; color: #888; }
+        .adm-tab.active { background: var(--neon-blue); color: black; font-weight: bold; }
+        .pay-option { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #333; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .pay-option.selected { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); }
+        .radio-c { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #555; }
+        .pay-option.selected .radio-c { background: var(--neon-blue); border-color: var(--neon-blue); }
+        .detail-box { display: none; padding: 10px; background: #111; border-radius: 10px; margin-bottom: 15px; font-size: 13px; color: #aaa; }
     </style>
 </head>
 <body>
+    <div class="bg-neon"></div>
+    <div id="loader"><h1 style="color:var(--neon-blue); font-style:italic;">KIMO EVOLUTION...</h1></div>
 
-    <div id="loader" style="position:fixed; width:100%; height:100%; background:#000; z-index:9999; display:flex; justify-content:center; align-items:center;"><h1>KIMO LOADING...</h1></div>
+    <button class="drawer-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
+    <div class="drawer-overlay" id="d-overlay" onclick="toggleDrawer()"></div>
+    <div class="drawer" id="d-menu">
+        <h2 style="color:var(--neon-blue); border-bottom: 1px solid rgba(0,210,255,0.3); padding-bottom: 10px;">MENU</h2>
+        <div class="drawer-item" onclick="nav('history-page')"><span></span> <b>Order History</b></div>
+        <div class="drawer-item" onclick="window.open('https://t.me/Ironman2005born')"><span></span> <b>Contact Developer</b></div>
+        <div class="drawer-item" onclick="drawerLogin()"><span></span> <b>Admin Panel</b></div>
+    </div>
 
-    <div id="auth-page">
-        <div class="auth-card" id="login-box">
-            <h2 style="color:var(--neon-blue)">KIMO LOGIN</h2>
-            <input type="text" id="auth-phone" class="admin-input" placeholder="Phone Number">
-            <input type="password" id="auth-pass" class="admin-input" placeholder="Password">
-            <button class="buy-pill" style="width:100%" onclick="handleAuth('login')">LOGIN</button>
-            <p onclick="toggleAuth()" style="font-size:12px; margin-top:15px; cursor:pointer;">No account? <span style="color:var(--neon-blue)">Register</span></p>
+    <div id="main-page" class="page active-page">
+        <header><div class="k-logo" onclick="logoClick()"><img id="display-logo" src=""></div><div class="shop-title">KIMO SHOP</div></header>
+        <div class="slider-wrapper"><div class="slider-container"><div class="slides" id="slide-track">
+            <div id="slide0" class="slide"><div class="slide-overlay"></div></div>
+            <div id="slide1" class="slide"><div class="slide-overlay"></div></div>
+            <div id="slide2" class="slide"><div class="slide-overlay"></div></div>
+        </div></div></div>
+        <div class="wallet-card">
+            <div><div style="font-size:11px; opacity:0.7;">MY BALANCE</div><div class="balance-amount"><span id="user-balance">0</span> MMK</div></div>
+            <button class="topup-btn" onclick="document.getElementById('topup-modal').style.display='block'">+ TOP UP</button>
         </div>
-        <div class="auth-card" id="reg-box" style="display:none;">
-            <h2 style="color:var(--neon-pink)">KIMO REGISTER</h2>
-            <input type="text" id="reg-phone" class="admin-input" placeholder="Phone Number">
-            <input type="password" id="reg-pass" class="admin-input" placeholder="Password">
-            <button class="buy-pill" style="width:100%; background:var(--neon-pink)" onclick="handleAuth('reg')">REGISTER</button>
-            <p onclick="toggleAuth()" style="font-size:12px; margin-top:15px; cursor:pointer;">Back to <span style="color:var(--neon-blue)">Login</span></p>
+        <div class="grid-layout">
+            <div class="main-card" id="card-mlbb" onclick="nav('mlbb-page')"></div>
+            <div class="main-card" id="card-pubg" onclick="nav('pubg-page')"></div>
+            <div class="main-card" id="card-heartopia" onclick="nav('heartopia-page')"></div>
+            <div class="main-card" id="card-tg" onclick="nav('tg-page')"></div>
+        </div>
+        <div class="main-card" onclick="nav('acc-page')" style="flex-direction:row; height: 100px; justify-content:space-between; align-items:center; margin-bottom:40px; padding: 0 20px;">
+            <h3 style="margin:0; text-align:left;">ACCOUNT<br>MARKET</h3>
+            <button class="buy-pill" style="width: auto; padding: 10px 20px; margin:0">VIEW STOCK</button>
         </div>
     </div>
 
-    <div id="app-content" style="display:none;">
-        <button class="drawer-btn" onclick="toggleDrawer()">MENU</button>
-        <div id="d-menu">
-            <h3 style="color:var(--neon-blue)">KIMO SHOP</h3>
-            <div onclick="nav('main-page')" style="padding:15px 0; cursor:pointer;">Home</div>
-            <div id="adm-entry" style="display:none; color:var(--neon-pink); padding:15px 0; cursor:pointer;" onclick="nav('admin-page')">ADMIN PANEL</div>
-            <div onclick="logout()" style="padding:15px 0; cursor:pointer; color:red;">Logout</div>
-        </div>
-
-        <div id="main-page" class="page">
-            <header>
-                <div class="k-logo"><img id="display-logo" src=""></div>
-                <div class="shop-title">KIMO SHOP</div>
-            </header>
-            <div class="wallet-card">
-                <div><div style="font-size:11px; opacity:0.7;">MY BALANCE</div><div class="balance-amount"><span id="user-balance">0</span> MMK</div></div>
-                <button class="buy-pill" style="padding:8px 15px;" onclick="nav('topup-page')">+ TOPUP</button>
-            </div>
-            <div class="grid-layout">
-                <div class="main-card" onclick="nav('mlbb-page')"><h3>MLBB</h3></div>
-                <div class="main-card" onclick="nav('pubg-page')"><h3>PUBG</h3></div>
-                <div class="main-card" onclick="nav('heartopia-page')"><h3>HEARTOPIA</h3></div>
-                <div class="main-card" onclick="nav('tg-page')"><h3>TELEGRAM</h3></div>
-            </div>
-        </div>
-
-        <div id="mlbb-page" class="page"><button onclick="nav('main-page')">BACK</button><h2>MLBB PRICES</h2><div id="list-mlbb"></div></div>
-        <div id="pubg-page" class="page"><button onclick="nav('main-page')">BACK</button><h2>PUBG PRICES</h2><div id="list-pubg"></div></div>
-        <div id="heartopia-page" class="page"><button onclick="nav('main-page')">BACK</button><h2>HEARTOPIA PRICES</h2><div id="list-heartopia"></div></div>
-        <div id="tg-page" class="page"><button onclick="nav('main-page')">BACK</button><h2>TELEGRAM PRICES</h2><div id="list-tg"></div></div>
-
-        <div id="topup-page" class="page">
-            <button onclick="nav('main-page')">BACK</button>
-            <h2>TOP UP WALLET</h2>
-            <div class="adm-sec">
-                <p>Kpay No: <b id="top-kp-num">-</b></p>
-                <p>Name: <b id="top-kp-name">-</b></p>
-                <input type="number" id="topup-amt" class="admin-input" placeholder="Amount">
-                <p>Attach Screenshot:</p>
-                <input type="file" id="topup-file" class="admin-input">
-                <button class="buy-pill" style="width:100%" onclick="submitTopup()">SUBMIT REQUEST</button>
-            </div>
-        </div>
-
-        <div id="admin-page" class="page">
-            <button onclick="nav('main-page')">EXIT ADMIN</button>
-            <h2 style="color:var(--neon-pink)">ADMIN PANEL</h2>
-            <div class="adm-tab-box">
-                <div class="adm-tab active" onclick="switchAdm(this,'requests')">Requests</div>
-                <div class="adm-tab" onclick="switchAdm(this,'prices')">Edit Prices</div>
-                <div class="adm-tab" onclick="switchAdm(this,'settings')">Site Settings</div>
-            </div>
-
-            <div id="adm-requests" class="adm-sec">
-                <h4>Pending Topups</h4>
-                <div id="admin-req-list"></div>
-            </div>
-
-            <div id="adm-prices" class="adm-sec" style="display:none">
-                <select id="edit-cat-select" class="admin-input" onchange="renderPriceEdit()">
-                    <option value="mlbb">MLBB</option><option value="pubg">PUBG</option>
-                    <option value="heartopia">HEARTOPIA</option><option value="tg">TG</option>
-                </select>
-                <div id="price-edit-list"></div>
-                <button class="buy-pill" onclick="addNewPriceRow()">+ Add Item</button>
-                <button class="buy-pill" style="background:green; margin-left:10px;" onclick="savePrices()">SAVE PRICES</button>
-            </div>
-
-            <div id="adm-settings" class="adm-sec" style="display:none">
-                <h4>Site Settings</h4>
-                <input type="text" id="set-kp-num" class="admin-input" placeholder="Kpay Number">
-                <input type="text" id="set-kp-name" class="admin-input" placeholder="Kpay Name">
-                <p>Logo:</p><input type="file" id="set-logo" class="admin-input">
-                <p>Background Image:</p><input type="file" id="set-bg" class="admin-input">
-                <button class="buy-pill" style="width:100%" onclick="saveSiteSettings()">SAVE SETTINGS</button>
-            </div>
+    <div id="acc-details-modal" class="modal">
+        <header><button class="back-btn" onclick="document.getElementById('acc-details-modal').style.display='none'"> CLOSE</button><div class="shop-title" style="font-size:18px;">DETAILS</div></header>
+        <div class="adm-sec">
+            <h2 id="det-title" style="color:var(--neon-blue); margin-top:0;">Account Title</h2>
+            <div id="det-imgs" class="detail-img-grid"></div>
+            <p id="det-desc" style="margin: 20px 0; line-height:1.6; color:#ccc; white-space: pre-wrap;"></p>
+            <h2 id="det-price" style="color:var(--neon-pink); font-size: 24px;">0 MMK</h2>
+            <button class="buy-pill" style="width:100%; height:50px; margin-top:20px; font-size: 16px;" id="det-buy-btn">BUY NOW</button>
         </div>
     </div>
+
+    <div id="purchase-modal" class="modal">
+        <h2 style="color:var(--neon-blue);">CONFIRM ORDER</h2>
+        <div class="adm-sec">
+            <h3 id="p-item-name">Item Name</h3>
+            <h1 id="p-item-price" style="color:var(--neon-pink);">0 MMK</h1>
+            <hr style="opacity:0.2; margin: 15px 0;">
+            <p>Player ID / Server ID:</p>
+            <input type="text" id="p-player-id" class="admin-input" placeholder="Example: 123456 (1234)">
+            <p>Payment Method:</p>
+            <div class="pay-option selected" id="opt-wallet" onclick="selectPay('wallet')">
+                <div class="radio-c"></div>
+                <div><b>KIMO Wallet</b> <br><span style="font-size:11px; opacity:0.7">Balance: <span id="modal-balance">0</span> MMK</span></div>
+            </div>
+            <div class="pay-option" id="opt-direct" onclick="selectPay('direct')">
+                <div class="radio-c"></div>
+                <div><b>Direct Transfer</b> <br><span style="font-size:11px; opacity:0.7">Kpay / Wave / KBZ</span></div>
+            </div>
+            <div id="info-direct" class="detail-box">
+                <p><b>Kpay:</b> <span id="display-kpay">09...</span> (<span id="display-kpay-name">Name</span>)</p>
+                <p><b>Wave:</b> <span id="display-wave">09...</span> (<span id="display-wave-name">Name</span>)</p>
+                <p>Screenshot:</p>
+                <input type="file" id="p-proof-img" class="admin-input" accept="image/*">
+            </div>
+            <button class="buy-pill" style="width:100%; margin-top:10px; height:45px;" onclick="submitOrder()">CONFIRM PURCHASE</button>
+            <button class="buy-pill" style="width:100%; background:#222; margin-top:10px;" onclick="closeBuyModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="admin-page" class="page">
+        <header><button class="back-btn" onclick="nav('main-page')"> EXIT</button><div class="shop-title">ADMIN</div></header>
+        <div class="adm-tabs">
+            <div class="adm-tab active" onclick="switchAdm(this,'requests')">Requests</div>
+            <div class="adm-tab" onclick="switchAdm(this,'orders')">Orders</div>
+            <div class="adm-tab" onclick="switchAdm(this,'prices')">Prices</div>
+            <div class="adm-tab" onclick="switchAdm(this,'acc')">Accounts</div>
+            <div class="adm-tab" onclick="switchAdm(this,'visuals')">Settings</div>
+        </div>
+        <div id="adm-requests" class="adm-sec"><h4>Pending Topups</h4><div id="req-list"></div></div>
+        <div id="adm-orders" class="adm-sec" style="display:none"><h4>Pending Orders</h4><div id="admin-order-list"></div></div>
+        <div id="adm-prices" class="adm-sec" style="display:none">
+            <div class="adm-tabs" style="margin-bottom:15px;">
+                <div class="adm-tab" onclick="currCat='mlbb';renderPriceEdit()">MLBB</div>
+                <div class="adm-tab" onclick="currCat='pubg';renderPriceEdit()">PUBG</div>
+                <div class="adm-tab" onclick="currCat='heartopia';renderPriceEdit()">HEART</div>
+                <div class="adm-tab" onclick="currCat='tg';renderPriceEdit()">TG</div>
+            </div>
+            <h4 id="edit-title">Editing</h4>
+            <div id="price-edit-area"></div>
+            <button class="buy-pill" style="width:100%; margin-bottom: 10px; background: #333;" onclick="addItem()">+ Add Row</button>
+            <button class="buy-pill" style="width:100%;" onclick="savePrices()">SAVE</button>
+        </div>
+        <div id="adm-acc" class="adm-sec" style="display:none">
+            <h4>Post New Account</h4>
+            <input type="text" id="a-title" class="admin-input" placeholder="Account Name/Title">
+            <textarea id="a-desc" class="admin-input" placeholder="Account Details" style="height:80px;"></textarea>
+            <input type="number" id="a-price" class="admin-input" placeholder="Price (MMK)">
+            <input type="file" id="a-imgs" class="admin-input" multiple accept="image/*">
+            <button class="buy-pill" style="width:100%" onclick="postAcc()">POST STOCK</button>
+            <div id="admin-acc-list" style="margin-top:20px;"></div>
+        </div>
+        <div id="adm-visuals" class="adm-sec" style="display:none">
+            <input type="text" id="adm-kp-num" class="admin-input" placeholder="Kpay No">
+            <input type="text" id="adm-kp-name" class="admin-input" placeholder="Kpay Name">
+            <input type="text" id="adm-wv-num" class="admin-input" placeholder="Wave No">
+            <input type="text" id="adm-wv-name" class="admin-input" placeholder="Wave Name">
+            <p>Logo: <input type="file" id="adm-logo" class="admin-input"></p>
+            <p>Background: <input type="file" id="adm-bg" class="admin-input"></p>
+            <p>Slider 1: <input type="file" id="adm-s0" class="admin-input"></p>
+            <p>Slider 2: <input type="file" id="adm-s1" class="admin-input"></p>
+            <p>Slider 3: <input type="file" id="adm-s2" class="admin-input"></p>
+            <h4>Icons</h4>
+            <p>MLBB: <input type="file" id="adm-icon-mlbb" class="admin-input"></p>
+            <p>PUBG: <input type="file" id="adm-icon-pubg" class="admin-input"></p>
+            <p>Heart: <input type="file" id="adm-icon-heartopia" class="admin-input"></p>
+            <p>TG: <input type="file" id="adm-icon-tg" class="admin-input"></p>
+            <button class="buy-pill" style="width:100%" onclick="saveVisuals()">SAVE SETTINGS</button>
+        </div>
+    </div>
+
+    <div id="history-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">HISTORY</div></header><div id="user-order-history"></div></div>
+    <div id="topup-modal" class="modal">
+        <h2 style="color:var(--neon-blue);">TOP UP</h2>
+        <div class="adm-sec">
+            <p><b>Kpay:</b> <span id="top-kpay">...</span></p>
+            <p><b>Wave:</b> <span id="top-wave">...</span></p>
+            <input type="number" id="topup-amt" class="admin-input" placeholder="Amount">
+            <input type="file" id="topup-file" class="admin-input" accept="image/*">
+            <button class="buy-pill" style="width:100%" onclick="submitTopup()">SUBMIT</button>
+            <button class="buy-pill" style="width:100%; background:#222; margin-top:10px;" onclick="document.getElementById('topup-modal').style.display='none'">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="mlbb-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">MLBB</div></header><div id="list-mlbb"></div></div>
+    <div id="pubg-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">PUBG</div></header><div id="list-pubg"></div></div>
+    <div id="heartopia-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">HEARTOPIA</div></header><div id="list-heartopia"></div></div>
+    <div id="tg-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">TELEGRAM</div></header><div id="list-tg"></div></div>
+    <div id="acc-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">ACCOUNTS</div></header><div id="list-acc"></div></div>
 
     <script>
         const SUPABASE_URL = 'https://wfvcurswhruefkgtrvcl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmN1cnN3aHJ1ZWZrZ3RydmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3NzQsImV4cCI6MjA4NjU2NDc3NH0.eOR7yiXZi4VK5VtdmN8sh-wZ1loVLVh3EHm7LlRHS5c';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let siteData = { mlbb:[], pubg:[], heartopia:[], tg:[], requests:[], settings:{} };
-
-        // --- AUTH ---
-        async function handleAuth(type) {
-            const phone = document.getElementById(type==='login'?'auth-phone':'reg-phone').value;
-            const pass = document.getElementById(type==='login'?'auth-pass':'reg-pass').value;
-            if(!phone || !pass) return alert("Fill all fields");
-
-            if(type === 'reg') {
-                const { error } = await _supabase.from('kimo_users').insert({ phone, password: pass, balance: 0 });
-                if(error) return alert("Account already exists!");
-                alert("Registered! Please login."); toggleAuth();
-            } else {
-                const { data } = await _supabase.from('kimo_users').select('*').eq('phone', phone).eq('password', pass).single();
-                if(!data) return alert("Incorrect login!");
-                currentUser = data;
-                localStorage.setItem('kimo_user', JSON.stringify(data));
-                startApp();
-            }
-        }
-
-        function toggleAuth() {
-            document.getElementById('login-box').style.display = document.getElementById('login-box').style.display==='none'?'block':'none';
-            document.getElementById('reg-box').style.display = document.getElementById('reg-box').style.display==='none'?'block':'none';
-        }
-
-        async function startApp() {
-            document.getElementById('auth-page').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            if(currentUser.phone === '09123456789' || currentUser.phone === 'kimo1500') {
-                document.getElementById('adm-entry').style.display = 'block';
-            }
-            await refreshData();
-            nav('main-page');
-        }
-
-        async function refreshData() {
-            const { data } = await _supabase.from('kimo_store').select('*');
-            data.forEach(row => {
-                if(row.category === 'site_settings') siteData.settings = row.content;
-                else if(row.category === 'wallet_requests') siteData.requests = row.content;
-                else if(siteData[row.category]) siteData[row.category] = row.content;
-            });
-
-            const { data: userBal } = await _supabase.from('kimo_users').select('balance').eq('phone', currentUser.phone).single();
-            if(userBal) currentUser.balance = userBal.balance;
-
-            renderUI();
-        }
-
-        function renderUI() {
-            document.getElementById('user-balance').innerText = (currentUser.balance || 0).toLocaleString();
-            document.getElementById('top-kp-num').innerText = siteData.settings.kpayNum || '-';
-            document.getElementById('top-kp-name').innerText = siteData.settings.kpayName || '-';
-            if(siteData.settings.logo) document.getElementById('display-logo').src = siteData.settings.logo;
-            if(siteData.settings.bg) document.body.style.backgroundImage = `url(${siteData.settings.bg})`;
-            
-            ['mlbb','pubg','heartopia','tg'].forEach(cat => {
-                const list = document.getElementById('list-'+cat);
-                if(list) list.innerHTML = siteData[cat].map(i => `<div class="price-item"><span>${i[0]}</span><button class="buy-pill" style="width:auto">${parseInt(i[1]).toLocaleString()} MMK</button></div>`).join('');
-            });
-            renderAdminReqs();
-        }
-
-        // --- ADMIN ---
-        function switchAdm(el, sec) {
-            document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('adm-requests').style.display = sec==='requests'?'block':'none';
-            document.getElementById('adm-prices').style.display = sec==='prices'?'block':'none';
-            document.getElementById('adm-settings').style.display = sec==='settings'?'block':'none';
-            if(sec==='prices') renderPriceEdit();
-        }
-
-        function renderPriceEdit() {
-            const cat = document.getElementById('edit-cat-select').value;
-            const area = document.getElementById('price-edit-list');
-            area.innerHTML = siteData[cat].map((item, idx) => `
-                <div style="display:flex; gap:5px; margin-bottom:5px;">
-                    <input class="admin-input" value="${item[0]}" onchange="siteData['${cat}'][${idx}][0]=this.value">
-                    <input class="admin-input" value="${item[1]}" onchange="siteData['${cat}'][${idx}][1]=this.value">
-                    <button onclick="siteData['${cat}'].splice(${idx},1);renderPriceEdit()" style="background:red; color:white; border-radius:10px; border:none; padding:5px 10px;">X</button>
-                </div>
-            `).join('');
-        }
-
-        function addNewPriceRow() {
-            const cat = document.getElementById('edit-cat-select').value;
-            siteData[cat].push(["New Item", "0"]); renderPriceEdit();
-        }
-
-        async function savePrices() {
-            const cat = document.getElementById('edit-cat-select').value;
-            await _supabase.from('kimo_store').upsert({ category: cat, content: siteData[cat] });
-            alert("Prices Saved!"); refreshData();
-        }
-
-        async function saveSiteSettings() {
-            const knum = document.getElementById('set-kp-num').value;
-            const kname = document.getElementById('set-kp-name').value;
-            const logo = document.getElementById('set-logo').files[0];
-            const bg = document.getElementById('set-bg').files[0];
-
-            if(knum) siteData.settings.kpayNum = knum;
-            if(kname) siteData.settings.kpayName = kname;
-            if(logo) siteData.settings.logo = await toBase64(logo);
-            if(bg) siteData.settings.bg = await toBase64(bg);
-
-            await _supabase.from('kimo_store').upsert({ category: 'site_settings', content: siteData.settings });
-            alert("Settings Updated!"); location.reload();
-        }
-
-        function renderAdminReqs() {
-            const list = document.getElementById('admin-req-list');
-            list.innerHTML = siteData.requests.map((r, i) => `
-                <div class="price-item">
-                    <span>${r.phone} (${parseInt(r.amt).toLocaleString()} MMK)</span>
-                    <button class="buy-pill" style="background:green" onclick="approveReq(${i})">APPROVE</button>
-                </div>
-            `).join('') || "No pending requests.";
-        }
-
-        async function approveReq(i) {
-            const r = siteData.requests[i];
-            const { data: u } = await _supabase.from('kimo_users').select('balance').eq('phone', r.phone).single();
-            await _supabase.from('kimo_users').update({ balance: (u.balance || 0) + parseInt(r.amt) }).eq('phone', r.phone);
-            siteData.requests.splice(i,1);
-            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: siteData.requests });
-            alert("Topup Approved!"); refreshData();
-        }
-
-        // --- HELPERS ---
-        function nav(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
-            toggleDrawer(false);
-        }
-        function toggleDrawer(force) {
-            const m = document.getElementById('d-menu');
-            if(force === false) m.classList.remove('open');
-            else m.classList.toggle('open');
-        }
-        function logout() { localStorage.clear(); location.reload(); }
-        function toBase64(file) { return new Promise(res => { const r = new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(file); }); }
-        async function submitTopup() {
-            const amt = document.getElementById('topup-amt').value;
-            if(!amt) return alert("Enter amount");
-            siteData.requests.push({ phone: currentUser.phone, amt: amt });
-            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: siteData.requests });
-            alert("Request sent successfully!"); nav('main-page');
-        }
-
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.display='none';
-                const saved = localStorage.getItem('kimo_user');
-                if(saved) { currentUser = JSON.parse(saved); startApp(); }
-            }, 1000);
+        // --- ဒီမှာ Price စျေးနှုန်းတွေကို အရင်အတိုင်း ပြန်ဖြည့်ပေးထားပါတယ် ---
+        let db = { 
+            mlbb: [["Weekly Diamond Pass", 5200], ["86 Diamonds", 4500], ["172 Diamonds", 8500], ["257 Diamonds", 12500], ["344 Diamonds", 16500], ["429 Diamonds", 20500], ["514 Diamonds", 24500], ["706 Diamonds", 32500]], 
+            pubg: [["60 UC", 3500], ["325 UC", 16500], ["660 UC", 32500]], 
+            heartopia: [["Weekly Pass", 5500], ["60 Gems", 3600], ["300 Gems", 17500]], 
+            tg: [["Telegram Premium (1 Month)", 15500], ["Telegram Premium (1 Year)", 125000]], 
+            accs: [], requests: [], orders: [], balance: 0 
         };
+        
+        let settings = { popular: '', kpayNum: '', kpayName: '', waveNum: '', waveName: '', s0:'', s1:'', s2:'', logo:'', bg:'', icon_mlbb:'', icon_pubg:'', icon_heartopia:'', icon_tg:'' }; 
+        let count = 0; let currCat = 'mlbb';
+        let currentOrder = { name: '', price: 0 };
+        let selectedPayment = 'wallet';
+
+        async function fetchCloudDB() {
+            try {
+                const { data } = await _supabase.from('kimo_store').select('*');
+                if (data && data.length > 0) {
+                    data.forEach(row => {
+                        if (row.category === 'wallet_requests') db.requests = row.content || [];
+                        else if (row.category === 'user_wallet') db.balance = row.content?.balance || 0;
+                        else if (row.category === 'site_settings') settings = { ...settings, ...row.content };
+                        else if (row.category === 'site_orders') db.orders = row.content || [];
+                        else if (row.category === 'site_accs') db.accs = row.content || [];
+                        else if (db[row.category] !== undefined) db[row.category] = row.content || [];
+                    });
+                }
+                renderMain();
+                renderAccs();
+            } catch (e) { console.error(e); }
+        }
+
+        function renderMain() {
+            const balEl = document.getElementById('user-balance');
+            if(balEl) balEl.innerText = (db.balance || 0).toLocaleString();
+            if(settings.logo) document.getElementById('display-logo').src = settings.logo;
+            if(settings.bg) document.body.style.backgroundImage = `url(${settings.bg})`;
+            document.getElementById('display-kpay').innerText = settings.kpayNum || '09...';
+            document.getElementById('display-kpay-name').innerText = settings.kpayName || 'Name';
+            document.getElementById('display-wave').innerText = settings.waveNum || '09...';
+            document.getElementById('display-wave-name').innerText = settings.waveName || 'Name';
+            document.getElementById('top-kpay').innerText = `${settings.kpayNum || '...'} (${settings.kpayName || '...'})`;
+            document.getElementById('top-wave').innerText = `${settings.waveNum || '...'} (${settings.waveName || '...'})`;
+            for(let i=0; i<3; i++) {
+                const sEl = document.getElementById('slide'+i);
+                if(sEl && settings['s'+i]) sEl.style.backgroundImage = `url(${settings['s'+i]})`;
+            }
+            if(document.getElementById('adm-kp-num')) {
+                document.getElementById('adm-kp-num').value = settings.kpayNum || '';
+                document.getElementById('adm-kp-name').value = settings.kpayName || '';
+                document.getElementById('adm-wv-num').value = settings.waveNum || '';
+                document.getElementById('adm-wv-name').value = settings.waveName || '';
+            }
+            ['mlbb', 'heartopia', 'pubg', 'tg'].forEach(c => {
+                const card = document.getElementById('card-' + c);
+                if(card) {
+                    const iconUrl = settings['icon_' + c] || '';
+                    card.innerHTML = `
+                        ${settings.popular === c ? '<div class="fire-badge"> HOT</div>' : ''}
+                        <div class="cat-icon-container">${iconUrl ? `<img src="${iconUrl}" class="cat-icon">` : `<h2>${c.toUpperCase()}</h2>`}</div>
+                        <div class="card-bottom"><h3>${c.toUpperCase()}</h3><button class="buy-pill">BUY NOW</button></div>
+                    `;
+                }
+                const list = document.getElementById('list-'+c);
+                if(list) list.innerHTML = (db[c] || []).map(i => `<div class="price-item"><span>${i[0]}</span><button class="buy-pill" style="width:auto; padding: 10px 15px;" onclick="openBuyModal('${i[0]}', ${i[1]})">${(i[1] || 0).toLocaleString()} MMK</button></div>`).join('');
+            });
+            const histEl = document.getElementById('user-order-history');
+            if(histEl) histEl.innerHTML = db.orders.map(o => `
+                <div class="order-card" style="border-right: 4px solid ${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">
+                    <p><b>${o.item}</b> - ${(o.price || 0).toLocaleString()} MMK</p>
+                    <span style="color:${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">${o.status}</span>
+                </div>
+            `).join('') || '<p style="text-align:center; opacity:0.5">No Orders</p>';
+            renderAdminOrders();
+            renderAdminRequests();
+        }
+
+        function renderAccs() {
+            const list = document.getElementById('list-acc');
+            if(!list) return;
+            const unsold = db.accs.filter(a => a && a.title && !a.sold);
+            list.innerHTML = unsold.map(a => {
+                const firstImg = Array.isArray(a.imgs) && a.imgs.length > 0 ? a.imgs[0] : (a.img || '');
+                const price = typeof a.price === 'number' ? a.price : 0;
+                return `
+                <div class="acc-card">
+                    ${firstImg ? `<img src="${firstImg}" class="acc-img">` : ''}
+                    <div class="acc-body">
+                        <h3>${a.title}</h3>
+                        <div class="acc-price">${price.toLocaleString()} MMK</div>
+                        <button class="buy-pill" style="width:100%; margin-top:10px;" onclick="showAccDetails(${a.id})">VIEW DETAILS</button>
+                    </div>
+                </div>`;
+            }).join('') || '<p style="text-align:center; padding:20px; opacity:0.5;">No Stock Available</p>';
+            const admList = document.getElementById('admin-acc-list');
+            if(admList) admList.innerHTML = db.accs.map((a, i) => `<div class="price-item"><span>${a.title || 'Untitled'} ${a.sold ? '(SOLD)' : ''}</span><button class="del-btn" onclick="delAcc(${i})">Del</button></div>`).join('');
+        }
+
+        function showAccDetails(id) {
+            const acc = db.accs.find(a => a.id === id);
+            if(!acc) return;
+            document.getElementById('det-title').innerText = acc.title;
+            document.getElementById('det-desc').innerText = acc.desc;
+            document.getElementById('det-price').innerText = (acc.price || 0).toLocaleString() + ' MMK';
+            const imgArea = document.getElementById('det-imgs');
+            imgArea.innerHTML = '';
+            const allImgs = Array.isArray(acc.imgs) ? acc.imgs : (acc.img ? [acc.img] : []);
+            allImgs.forEach(src => { if(src) imgArea.innerHTML += `<img src="${src}">`; });
+            document.getElementById('det-buy-btn').onclick = () => { document.getElementById('acc-details-modal').style.display='none'; openBuyModal(acc.title, acc.price, acc.id); };
+            document.getElementById('acc-details-modal').style.display='block';
+        }
+
+        async function postAcc() {
+            const title = document.getElementById('a-title').value;
+            const desc = document.getElementById('a-desc').value;
+            const price = parseInt(document.getElementById('a-price').value);
+            const files = document.getElementById('a-imgs').files;
+            if(!title || isNaN(price)) return alert("Please fill Name and Price");
+            let imgList = [];
+            for(let f of files) { imgList.push(await procImg(f)); }
+            const newAcc = { id: Date.now(), title, desc, price, imgs: imgList, sold: false };
+            db.accs.push(newAcc);
+            const { error } = await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
+            if(!error) { alert("Account Posted!"); document.getElementById('a-title').value=''; document.getElementById('a-desc').value=''; document.getElementById('a-price').value=''; renderAccs(); }
+        }
+
+        async function delAcc(i) {
+            if(confirm("Delete this account?")) {
+                db.accs.splice(i, 1);
+                await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
+                renderAccs();
+            }
+        }
+
+        async function procImg(file) { return new Promise(res => { const r = new FileReader(); r.readAsDataURL(file); r.onload = e => res(e.target.result); }); }
+        
+        function nav(id) { 
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); 
+            const target = document.getElementById(id); if(target) target.classList.add('active-page'); 
+            if(document.getElementById('d-menu').classList.contains('open')) toggleDrawer(); 
+            window.scrollTo(0,0);
+        }
+
+        function toggleDrawer() { document.getElementById('d-menu').classList.toggle('open'); document.getElementById('d-overlay').style.display = document.getElementById('d-menu').classList.contains('open') ? 'block' : 'none'; }
+        
+        function openBuyModal(name, price, accId = null) { 
+            currentOrder = { name, price, accId }; 
+            document.getElementById('p-item-name').innerText = name; 
+            document.getElementById('p-item-price').innerText = (price || 0).toLocaleString() + ' MMK'; 
+            document.getElementById('modal-balance').innerText = (db.balance || 0).toLocaleString(); 
+            document.getElementById('purchase-modal').style.display = 'block'; 
+            selectPay('wallet'); 
+        }
+        
+        function closeBuyModal() { document.getElementById('purchase-modal').style.display = 'none'; }
+        
+        function selectPay(m) { 
+            selectedPayment = m; 
+            document.getElementById('opt-wallet').classList.toggle('selected', m==='wallet'); 
+            document.getElementById('opt-direct').classList.toggle('selected', m==='direct'); 
+            document.getElementById('info-direct').style.display = m === 'direct' ? 'block' : 'none'; 
+        }
+        
+        async function submitOrder() {
+            const pid = document.getElementById('p-player-id').value;
+            if(!pid) return alert("Player ID is required");
+            let proof = null;
+            if(selectedPayment === 'wallet') {
+                if((db.balance || 0) < currentOrder.price) return alert("Insufficient Balance!");
+                db.balance -= currentOrder.price;
+            } else {
+                const f = document.getElementById('p-proof-img').files[0];
+                if(!f) return alert("Upload payment screenshot"); 
+                proof = await procImg(f);
+            }
+
+            if(currentOrder.accId) {
+                const accIdx = db.accs.findIndex(a => a && a.id === currentOrder.accId);
+                if(accIdx > -1) {
+                    db.accs[accIdx].sold = true;
+                    renderAccs();
+                    setTimeout(async () => {
+                        db.accs = db.accs.filter(a => a && a.id !== currentOrder.accId);
+                        await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
+                        renderAccs();
+                    }, 10000);
+                }
+            }
+
+            db.orders.unshift({ item: currentOrder.name, price: currentOrder.price, playerId: pid, method: selectedPayment, proof, date: new Date().toLocaleString(), status: 'Pending' });
+            
+            try {
+                await Promise.all([
+                    _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }),
+                    _supabase.from('kimo_store').upsert({ category: 'user_wallet', content: { balance: db.balance } }, { onConflict: 'category' }),
+                    _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' })
+                ]);
+                alert("Order submitted!"); closeBuyModal(); renderMain();
+            } catch (err) { alert("Error submitting order!"); }
+        }
+
+        function switchAdm(el, secId) {
+            document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+            if(el) el.classList.add('active');
+            const sections = ['requests', 'orders', 'prices', 'acc', 'visuals'];
+            sections.forEach(s => { const target = document.getElementById('adm-' + s); if(target) target.style.display = 'none'; });
+            const activeSec = document.getElementById('adm-' + secId);
+            if(activeSec) {
+                activeSec.style.display = 'block';
+                if(secId === 'prices') renderPriceEdit();
+                if(secId === 'requests') renderAdminRequests();
+                if(secId === 'orders') renderAdminOrders();
+            }
+        }
+
+        async function submitTopup() {
+            const amt = parseInt(document.getElementById('topup-amt').value);
+            const file = document.getElementById('topup-file').files[0];
+            if(!amt || !file) return alert("Amount and Screenshot required");
+            const proof = await procImg(file);
+            db.requests.unshift({ amt, proof, status: 'Pending', date: new Date().toLocaleString() });
+            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
+            alert("Top-up request sent!"); document.getElementById('topup-modal').style.display = 'none';
+        }
+
+        function renderPriceEdit() { 
+            const container = document.getElementById('price-edit-area'); if(!container) return;
+            container.innerHTML = ''; 
+            (db[currCat] || []).forEach((item, index) => { 
+                container.innerHTML += `<div class="price-edit-row"><input type="text" value="${item[0]}" id="p-name-${index}"><input type="number" value="${item[1]}" id="p-price-${index}"><button class="del-btn" onclick="db['${currCat}'].splice(${index},1);renderPriceEdit()">X</button></div>`; 
+            }); 
+        }
+
+        function addItem() { if(!db[currCat]) db[currCat] = []; db[currCat].push(["New Item", 0]); renderPriceEdit(); }
+
+        async function savePrices() { 
+            const rows = document.querySelectorAll('.price-edit-row'); 
+            let newData = []; 
+            rows.forEach((row, i) => { 
+                const nameInput = document.getElementById(`p-name-${i}`);
+                const priceInput = document.getElementById(`p-price-${i}`);
+                if(nameInput && priceInput) newData.push([nameInput.value, parseInt(priceInput.value) || 0]);
+            }); 
+            db[currCat] = newData; 
+            await _supabase.from('kimo_store').upsert({ category: currCat, content: newData }, { onConflict: 'category' }); 
+            alert("Prices saved!"); renderMain(); 
+        }
+
+        async function saveVisuals() { 
+            settings.kpayNum = document.getElementById('adm-kp-num').value; 
+            settings.kpayName = document.getElementById('adm-kp-name').value;
+            settings.waveNum = document.getElementById('adm-wv-num').value; 
+            settings.waveName = document.getElementById('adm-wv-name').value;
+            const fileIds = { bg:'adm-bg', logo:'adm-logo', s0:'adm-s0', s1:'adm-s1', s2:'adm-s2', icon_mlbb:'adm-icon-mlbb', icon_pubg:'adm-icon-pubg', icon_heartopia:'adm-icon-heartopia', icon_tg:'adm-icon-tg' };
+            for (let key in fileIds) { 
+                const input = document.getElementById(fileIds[key]);
+                if(input && input.files[0]) settings[key] = await procImg(input.files[0]);
+            }
+            await _supabase.from('kimo_store').upsert({ category: 'site_settings', content: settings }, { onConflict: 'category' }); 
+            alert("Settings saved!"); fetchCloudDB();
+        }
+
+        function renderAdminOrders() { 
+            const orderList = document.getElementById('admin-order-list');
+            if(orderList) {
+                const pendingOrders = db.orders.filter(o => o.status === 'Pending');
+                orderList.innerHTML = pendingOrders.map((o) => {
+                    const originalIdx = db.orders.indexOf(o);
+                    return `<div class="order-card">
+                        <p><b>${o.item}</b> (${(o.price || 0).toLocaleString()} MMK)</p>
+                        <p>ID: ${o.playerId} | Method: ${o.method}</p>
+                        ${o.proof ? `<button onclick="window.open('${o.proof}')" style="background:#444; color:white; border:none; padding:5px; border-radius:5px; margin-bottom:10px;">View Screenshot</button>` : ''}
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="updateOrder(${originalIdx},'Completed')" style="background:var(--neon-blue); flex:1; border:none; padding:10px; border-radius:10px; font-weight:bold;">Approve</button> 
+                            <button class="del-btn" onclick="updateOrder(${originalIdx},'Rejected')" style="flex:1;">Reject</button>
+                        </div>
+                    </div>`;
+                }).join('') || '<p style="text-align:center; opacity:0.5">No Pending Orders</p>'; 
+            }
+        }
+
+        async function updateOrder(i, s) { 
+            db.orders[i].status = s; 
+            await _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }); 
+            renderMain(); 
+        }
+
+        function renderAdminRequests() {
+            const reqList = document.getElementById('req-list');
+            if(reqList) reqList.innerHTML = db.requests.map((r, i) => `
+                <div class="order-card">
+                    <p>Amount: ${(r.amt || 0).toLocaleString()} MMK</p>
+                    <button onclick="window.open('${r.proof}')" style="background:#444; color:white; border:none; padding:5px; border-radius:5px; margin-bottom:10px;">View Proof</button>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="approveRequest(${i})" style="background:var(--neon-blue); flex:1; border:none; padding:10px; border-radius:10px; font-weight:bold;">Approve</button>
+                        <button class="del-btn" onclick="rejectRequest(${i})" style="flex:1;">Reject</button>
+                    </div>
+                </div>
+            `).join('') || '<p style="text-align:center; opacity:0.5">No requests</p>';
+        }
+
+        async function approveRequest(i) {
+            const req = db.requests[i];
+            db.balance = (db.balance || 0) + req.amt;
+            db.requests.splice(i, 1);
+            await _supabase.from('kimo_store').upsert([{ category: 'user_wallet', content: { balance: db.balance } }, { category: 'wallet_requests', content: db.requests }], { onConflict: 'category' });
+            alert("Balance added!"); fetchCloudDB();
+        }
+
+        async function rejectRequest(i) {
+            db.requests.splice(i, 1);
+            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
+            fetchCloudDB();
+        }
+
+        function drawerLogin() { if(prompt("Enter Admin Pass:")==="kimo1500") nav('admin-page'); }
+        function logoClick() { count++; if(count == 5) drawerLogin(); setTimeout(() => count = 0, 2000); }
+        function startSlider() { let i=0; setInterval(()=>{ i=(i+1)%3; const track = document.getElementById('slide-track'); if(track) track.style.transform=`translateX(-${i*33.333}%)`; }, 5000); }
+        window.onload = () => { setTimeout(() => { document.getElementById('loader').style.display='none'; fetchCloudDB(); startSlider(); }, 1200); };
     </script>
 </body>
 </html>
-
