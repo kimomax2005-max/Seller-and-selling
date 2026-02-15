@@ -55,10 +55,8 @@
         .acc-body { padding: 15px; }
         .acc-price { color: var(--neon-pink); font-size: 20px; font-weight: bold; }
         .order-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #333; }
-
         .detail-img-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
         .detail-img-grid img { width: 100%; border-radius: 10px; border: 1px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
-        
         .fire-badge { position: absolute; top: 0; right: 0; background: linear-gradient(45deg, #ff0000, #ff8800); color: white; padding: 5px 12px; border-bottom-left-radius: 15px; font-size: 10px; font-weight: 900; z-index: 10; animation: burn 0.8s infinite alternate; }
         @keyframes burn { 0% { box-shadow: 0 0 5px #ff4400; transform: scale(1); } 100% { box-shadow: 0 0 20px #ffaa00; transform: scale(1.05); } }
         .price-edit-row { display: flex; gap: 5px; margin-bottom: 10px; align-items: center; }
@@ -79,7 +77,6 @@
     <div id="loader"><h1 style="color:var(--neon-blue); font-style:italic;">KIMO EVOLUTION...</h1></div>
 
     <button class="drawer-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></button>
-    
     <div class="drawer-overlay" id="d-overlay" onclick="toggleDrawer()"></div>
     <div class="drawer" id="d-menu">
         <h2 style="color:var(--neon-blue); border-bottom: 1px solid rgba(0,210,255,0.3); padding-bottom: 10px;">MENU</h2>
@@ -95,19 +92,16 @@
             <div id="slide1" class="slide"><div class="slide-overlay"></div></div>
             <div id="slide2" class="slide"><div class="slide-overlay"></div></div>
         </div></div></div>
-
         <div class="wallet-card">
             <div><div style="font-size:11px; opacity:0.7;">MY BALANCE</div><div class="balance-amount"><span id="user-balance">0</span> MMK</div></div>
             <button class="topup-btn" onclick="document.getElementById('topup-modal').style.display='block'">+ TOP UP</button>
         </div>
-
         <div class="grid-layout">
             <div class="main-card" id="card-mlbb" onclick="nav('mlbb-page')"></div>
             <div class="main-card" id="card-pubg" onclick="nav('pubg-page')"></div>
             <div class="main-card" id="card-heartopia" onclick="nav('heartopia-page')"></div>
             <div class="main-card" id="card-tg" onclick="nav('tg-page')"></div>
         </div>
-
         <div class="main-card" onclick="nav('acc-page')" style="flex-direction:row; height: 100px; justify-content:space-between; align-items:center; margin-bottom:40px; padding: 0 20px;">
             <h3 style="margin:0; text-align:left;">ACCOUNT<br>MARKET</h3>
             <button class="buy-pill" style="width: auto; padding: 10px 20px; margin:0">VIEW STOCK</button>
@@ -205,7 +199,6 @@
     </div>
 
     <div id="history-page" class="page"><header><button class="back-btn" onclick="nav('main-page')"> BACK</button><div class="shop-title">HISTORY</div></header><div id="user-order-history"></div></div>
-    
     <div id="topup-modal" class="modal">
         <h2 style="color:var(--neon-blue);">TOP UP</h2>
         <div class="adm-sec">
@@ -229,36 +222,24 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmN1cnN3aHJ1ZWZrZ3RydmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3NzQsImV4cCI6MjA4NjU2NDc3NH0.eOR7yiXZi4VK5VtdmN8sh-wZ1loVLVh3EHm7LlRHS5c';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let db = { mlbb: [], pubg: [], heartopia: [], tg: [], accs: [], requests: [], orders: [], balance: 0 };
+        // --- ဒီမှာ Price စျေးနှုန်းတွေကို အရင်အတိုင်း ပြန်ဖြည့်ပေးထားပါတယ် ---
+        let db = { 
+            mlbb: [["Weekly Diamond Pass", 5200], ["86 Diamonds", 4500], ["172 Diamonds", 8500], ["257 Diamonds", 12500], ["344 Diamonds", 16500], ["429 Diamonds", 20500], ["514 Diamonds", 24500], ["706 Diamonds", 32500]], 
+            pubg: [["60 UC", 3500], ["325 UC", 16500], ["660 UC", 32500]], 
+            heartopia: [["Weekly Pass", 5500], ["60 Gems", 3600], ["300 Gems", 17500]], 
+            tg: [["Telegram Premium (1 Month)", 15500], ["Telegram Premium (1 Year)", 125000]], 
+            accs: [], requests: [], orders: [], balance: 0 
+        };
+        
         let settings = { popular: '', kpayNum: '', kpayName: '', waveNum: '', waveName: '', s0:'', s1:'', s2:'', logo:'', bg:'', icon_mlbb:'', icon_pubg:'', icon_heartopia:'', icon_tg:'' }; 
         let count = 0; let currCat = 'mlbb';
         let currentOrder = { name: '', price: 0 };
         let selectedPayment = 'wallet';
 
-        // Fix: switchAdm define properly
-        function switchAdm(el, secId) {
-            document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
-            if(el) el.classList.add('active');
-            
-            const sections = ['requests', 'orders', 'prices', 'acc', 'visuals'];
-            sections.forEach(s => {
-                const target = document.getElementById('adm-' + s);
-                if(target) target.style.display = 'none';
-            });
-            
-            const activeSec = document.getElementById('adm-' + secId);
-            if(activeSec) {
-                activeSec.style.display = 'block';
-                if(secId === 'prices') renderPriceEdit();
-                if(secId === 'requests') renderAdminRequests();
-                if(secId === 'orders') renderAdminOrders();
-            }
-        }
-
         async function fetchCloudDB() {
             try {
                 const { data } = await _supabase.from('kimo_store').select('*');
-                if (data) {
+                if (data && data.length > 0) {
                     data.forEach(row => {
                         if (row.category === 'wallet_requests') db.requests = row.content || [];
                         else if (row.category === 'user_wallet') db.balance = row.content?.balance || 0;
@@ -267,35 +248,33 @@
                         else if (row.category === 'site_accs') db.accs = row.content || [];
                         else if (db[row.category] !== undefined) db[row.category] = row.content || [];
                     });
-                    renderMain();
-                    renderAccs();
                 }
+                renderMain();
+                renderAccs();
             } catch (e) { console.error(e); }
         }
 
         function renderMain() {
-            document.getElementById('user-balance').innerText = (db.balance || 0).toLocaleString();
+            const balEl = document.getElementById('user-balance');
+            if(balEl) balEl.innerText = (db.balance || 0).toLocaleString();
             if(settings.logo) document.getElementById('display-logo').src = settings.logo;
             if(settings.bg) document.body.style.backgroundImage = `url(${settings.bg})`;
-            
             document.getElementById('display-kpay').innerText = settings.kpayNum || '09...';
             document.getElementById('display-kpay-name').innerText = settings.kpayName || 'Name';
             document.getElementById('display-wave').innerText = settings.waveNum || '09...';
             document.getElementById('display-wave-name').innerText = settings.waveName || 'Name';
             document.getElementById('top-kpay').innerText = `${settings.kpayNum || '...'} (${settings.kpayName || '...'})`;
             document.getElementById('top-wave').innerText = `${settings.waveNum || '...'} (${settings.waveName || '...'})`;
-            
             for(let i=0; i<3; i++) {
-                if(settings['s'+i]) document.getElementById('slide'+i).style.backgroundImage = `url(${settings['s'+i]})`;
+                const sEl = document.getElementById('slide'+i);
+                if(sEl && settings['s'+i]) sEl.style.backgroundImage = `url(${settings['s'+i]})`;
             }
-
             if(document.getElementById('adm-kp-num')) {
                 document.getElementById('adm-kp-num').value = settings.kpayNum || '';
                 document.getElementById('adm-kp-name').value = settings.kpayName || '';
                 document.getElementById('adm-wv-num').value = settings.waveNum || '';
                 document.getElementById('adm-wv-name').value = settings.waveName || '';
             }
-
             ['mlbb', 'heartopia', 'pubg', 'tg'].forEach(c => {
                 const card = document.getElementById('card-' + c);
                 if(card) {
@@ -309,36 +288,36 @@
                 const list = document.getElementById('list-'+c);
                 if(list) list.innerHTML = (db[c] || []).map(i => `<div class="price-item"><span>${i[0]}</span><button class="buy-pill" style="width:auto; padding: 10px 15px;" onclick="openBuyModal('${i[0]}', ${i[1]})">${(i[1] || 0).toLocaleString()} MMK</button></div>`).join('');
             });
-            
-            document.getElementById('user-order-history').innerHTML = db.orders.map(o => `
+            const histEl = document.getElementById('user-order-history');
+            if(histEl) histEl.innerHTML = db.orders.map(o => `
                 <div class="order-card" style="border-right: 4px solid ${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">
                     <p><b>${o.item}</b> - ${(o.price || 0).toLocaleString()} MMK</p>
                     <span style="color:${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">${o.status}</span>
                 </div>
             `).join('') || '<p style="text-align:center; opacity:0.5">No Orders</p>';
-
             renderAdminOrders();
             renderAdminRequests();
         }
 
         function renderAccs() {
             const list = document.getElementById('list-acc');
-            const unsold = db.accs.filter(a => !a.sold);
+            if(!list) return;
+            const unsold = db.accs.filter(a => a && a.title && !a.sold);
             list.innerHTML = unsold.map(a => {
                 const firstImg = Array.isArray(a.imgs) && a.imgs.length > 0 ? a.imgs[0] : (a.img || '');
+                const price = typeof a.price === 'number' ? a.price : 0;
                 return `
                 <div class="acc-card">
                     ${firstImg ? `<img src="${firstImg}" class="acc-img">` : ''}
                     <div class="acc-body">
                         <h3>${a.title}</h3>
-                        <div class="acc-price">${(a.price || 0).toLocaleString()} MMK</div>
+                        <div class="acc-price">${price.toLocaleString()} MMK</div>
                         <button class="buy-pill" style="width:100%; margin-top:10px;" onclick="showAccDetails(${a.id})">VIEW DETAILS</button>
                     </div>
                 </div>`;
-            }).join('') || '<p style="text-align:center;">No Stock Available</p>';
-
+            }).join('') || '<p style="text-align:center; padding:20px; opacity:0.5;">No Stock Available</p>';
             const admList = document.getElementById('admin-acc-list');
-            if(admList) admList.innerHTML = db.accs.map((a, i) => `<div class="price-item"><span>${a.title} ${a.sold ? '(SOLD)' : ''}</span><button class="del-btn" onclick="delAcc(${i})">Del</button></div>`).join('');
+            if(admList) admList.innerHTML = db.accs.map((a, i) => `<div class="price-item"><span>${a.title || 'Untitled'} ${a.sold ? '(SOLD)' : ''}</span><button class="del-btn" onclick="delAcc(${i})">Del</button></div>`).join('');
         }
 
         function showAccDetails(id) {
@@ -347,16 +326,11 @@
             document.getElementById('det-title').innerText = acc.title;
             document.getElementById('det-desc').innerText = acc.desc;
             document.getElementById('det-price').innerText = (acc.price || 0).toLocaleString() + ' MMK';
-            
             const imgArea = document.getElementById('det-imgs');
             imgArea.innerHTML = '';
             const allImgs = Array.isArray(acc.imgs) ? acc.imgs : (acc.img ? [acc.img] : []);
             allImgs.forEach(src => { if(src) imgArea.innerHTML += `<img src="${src}">`; });
-            
-            document.getElementById('det-buy-btn').onclick = () => {
-                document.getElementById('acc-details-modal').style.display='none';
-                openBuyModal(acc.title, acc.price);
-            };
+            document.getElementById('det-buy-btn').onclick = () => { document.getElementById('acc-details-modal').style.display='none'; openBuyModal(acc.title, acc.price, acc.id); };
             document.getElementById('acc-details-modal').style.display='block';
         }
 
@@ -365,16 +339,13 @@
             const desc = document.getElementById('a-desc').value;
             const price = parseInt(document.getElementById('a-price').value);
             const files = document.getElementById('a-imgs').files;
-            
             if(!title || isNaN(price)) return alert("Please fill Name and Price");
-            
             let imgList = [];
             for(let f of files) { imgList.push(await procImg(f)); }
-            
             const newAcc = { id: Date.now(), title, desc, price, imgs: imgList, sold: false };
             db.accs.push(newAcc);
-            await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
-            alert("Account Posted!"); renderAccs();
+            const { error } = await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
+            if(!error) { alert("Account Posted!"); document.getElementById('a-title').value=''; document.getElementById('a-desc').value=''; document.getElementById('a-price').value=''; renderAccs(); }
         }
 
         async function delAcc(i) {
@@ -389,18 +360,15 @@
         
         function nav(id) { 
             document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); 
-            document.getElementById(id).classList.add('active-page'); 
+            const target = document.getElementById(id); if(target) target.classList.add('active-page'); 
             if(document.getElementById('d-menu').classList.contains('open')) toggleDrawer(); 
             window.scrollTo(0,0);
         }
 
-        function toggleDrawer() { 
-            document.getElementById('d-menu').classList.toggle('open'); 
-            document.getElementById('d-overlay').style.display = document.getElementById('d-menu').classList.contains('open') ? 'block' : 'none'; 
-        }
+        function toggleDrawer() { document.getElementById('d-menu').classList.toggle('open'); document.getElementById('d-overlay').style.display = document.getElementById('d-menu').classList.contains('open') ? 'block' : 'none'; }
         
-        function openBuyModal(name, price) { 
-            currentOrder = { name, price }; 
+        function openBuyModal(name, price, accId = null) { 
+            currentOrder = { name, price, accId }; 
             document.getElementById('p-item-name').innerText = name; 
             document.getElementById('p-item-price').innerText = (price || 0).toLocaleString() + ' MMK'; 
             document.getElementById('modal-balance').innerText = (db.balance || 0).toLocaleString(); 
@@ -429,19 +397,44 @@
                 if(!f) return alert("Upload payment screenshot"); 
                 proof = await procImg(f);
             }
+
+            if(currentOrder.accId) {
+                const accIdx = db.accs.findIndex(a => a && a.id === currentOrder.accId);
+                if(accIdx > -1) {
+                    db.accs[accIdx].sold = true;
+                    renderAccs();
+                    setTimeout(async () => {
+                        db.accs = db.accs.filter(a => a && a.id !== currentOrder.accId);
+                        await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
+                        renderAccs();
+                    }, 10000);
+                }
+            }
+
             db.orders.unshift({ item: currentOrder.name, price: currentOrder.price, playerId: pid, method: selectedPayment, proof, date: new Date().toLocaleString(), status: 'Pending' });
             
-            // Mark account as sold if it's from market
-            const accIdx = db.accs.findIndex(a => a.title === currentOrder.name);
-            if(accIdx > -1) db.accs[accIdx].sold = true;
+            try {
+                await Promise.all([
+                    _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }),
+                    _supabase.from('kimo_store').upsert({ category: 'user_wallet', content: { balance: db.balance } }, { onConflict: 'category' }),
+                    _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' })
+                ]);
+                alert("Order submitted!"); closeBuyModal(); renderMain();
+            } catch (err) { alert("Error submitting order!"); }
+        }
 
-            await _supabase.from('kimo_store').upsert([
-                { category: 'site_orders', content: db.orders }, 
-                { category: 'user_wallet', content: { balance: db.balance } }, 
-                { category: 'site_accs', content: db.accs }
-            ], { onConflict: 'category' });
-            
-            alert("Order submitted!"); closeBuyModal(); fetchCloudDB();
+        function switchAdm(el, secId) {
+            document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+            if(el) el.classList.add('active');
+            const sections = ['requests', 'orders', 'prices', 'acc', 'visuals'];
+            sections.forEach(s => { const target = document.getElementById('adm-' + s); if(target) target.style.display = 'none'; });
+            const activeSec = document.getElementById('adm-' + secId);
+            if(activeSec) {
+                activeSec.style.display = 'block';
+                if(secId === 'prices') renderPriceEdit();
+                if(secId === 'requests') renderAdminRequests();
+                if(secId === 'orders') renderAdminOrders();
+            }
         }
 
         async function submitTopup() {
@@ -451,23 +444,18 @@
             const proof = await procImg(file);
             db.requests.unshift({ amt, proof, status: 'Pending', date: new Date().toLocaleString() });
             await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
-            alert("Top-up request sent!");
-            document.getElementById('topup-modal').style.display = 'none';
+            alert("Top-up request sent!"); document.getElementById('topup-modal').style.display = 'none';
         }
 
         function renderPriceEdit() { 
-            const container = document.getElementById('price-edit-area'); 
+            const container = document.getElementById('price-edit-area'); if(!container) return;
             container.innerHTML = ''; 
             (db[currCat] || []).forEach((item, index) => { 
                 container.innerHTML += `<div class="price-edit-row"><input type="text" value="${item[0]}" id="p-name-${index}"><input type="number" value="${item[1]}" id="p-price-${index}"><button class="del-btn" onclick="db['${currCat}'].splice(${index},1);renderPriceEdit()">X</button></div>`; 
             }); 
         }
 
-        function addItem() {
-            if(!db[currCat]) db[currCat] = [];
-            db[currCat].push(["New Item", 0]);
-            renderPriceEdit();
-        }
+        function addItem() { if(!db[currCat]) db[currCat] = []; db[currCat].push(["New Item", 0]); renderPriceEdit(); }
 
         async function savePrices() { 
             const rows = document.querySelectorAll('.price-edit-row'); 
@@ -487,7 +475,6 @@
             settings.kpayName = document.getElementById('adm-kp-name').value;
             settings.waveNum = document.getElementById('adm-wv-num').value; 
             settings.waveName = document.getElementById('adm-wv-name').value;
-            
             const fileIds = { bg:'adm-bg', logo:'adm-logo', s0:'adm-s0', s1:'adm-s1', s2:'adm-s2', icon_mlbb:'adm-icon-mlbb', icon_pubg:'adm-icon-pubg', icon_heartopia:'adm-icon-heartopia', icon_tg:'adm-icon-tg' };
             for (let key in fileIds) { 
                 const input = document.getElementById(fileIds[key]);
@@ -504,7 +491,7 @@
                 orderList.innerHTML = pendingOrders.map((o) => {
                     const originalIdx = db.orders.indexOf(o);
                     return `<div class="order-card">
-                        <p><b>${o.item}</b> (${o.price.toLocaleString()} MMK)</p>
+                        <p><b>${o.item}</b> (${(o.price || 0).toLocaleString()} MMK)</p>
                         <p>ID: ${o.playerId} | Method: ${o.method}</p>
                         ${o.proof ? `<button onclick="window.open('${o.proof}')" style="background:#444; color:white; border:none; padding:5px; border-radius:5px; margin-bottom:10px;">View Screenshot</button>` : ''}
                         <div style="display:flex; gap:10px;">
