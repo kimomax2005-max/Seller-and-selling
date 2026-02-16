@@ -9,40 +9,31 @@
         :root { --neon-blue: #00d2ff; --neon-pink: #bc13fe; --glass: rgba(255, 255, 255, 0.05); --card-border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; background: #050508; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.5s ease; padding-bottom: 80px; }
         .bg-neon { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(188, 19, 254, 0.15) 0%, transparent 45%); z-index: -1; }
-        
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        
         .wallet-card { background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(188, 19, 254, 0.1)); border: 1px solid var(--neon-blue); border-radius: 25px; padding: 20px; margin-bottom: 30px; backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .balance-amount { font-size: 26px; font-weight: 900; color: var(--neon-blue); }
         .topup-btn { background: var(--neon-blue); color: black; border: none; padding: 12px 20px; border-radius: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px var(--neon-blue); }
-
         .drawer-btn { position: fixed; right: 20px; top: 25px; z-index: 1000; background: rgba(0,0,0,0.6); border: 1px solid var(--neon-blue); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
         .drawer-btn span { width: 25px; height: 3px; background: var(--neon-blue); border-radius: 2px; transition: 0.3s; }
-
         .drawer { position: fixed; top: 0; right: -310px; width: 290px; height: 100%; background: linear-gradient(165deg, rgba(10, 10, 15, 0.95) 0%, rgba(20, 10, 30, 0.98) 100%); backdrop-filter: blur(25px); z-index: 2000; transition: 0.5s; border-left: 2px solid rgba(0, 210, 255, 0.2); padding: 40px 25px; box-sizing: border-box; display: flex; flex-direction: column; }
         .drawer.open { right: 0; }
         .drawer-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; z-index: 1500; }
         .drawer-item { background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: 18px; margin-bottom: 18px; border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 15px; }
-        
         #loader { position: fixed; width: 100%; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .page { display: none; padding: 20px; animation: fadeIn 0.6s ease-out; max-width: 800px; margin: auto; }
         .active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        
         header { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; padding-top: 20px; position: relative; }
         .back-btn { position: absolute; left: 0; top: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white; padding: 8px 15px; border-radius: 12px; cursor: pointer; font-size: 12px; }
         .k-logo { width: 70px; height: 70px; border-radius: 20px; overflow: hidden; border: 2px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
         .k-logo img { width: 100%; height: 100%; object-fit: cover; }
-        
         .shop-title-container { display: flex; flex-direction: column; margin-left: 20px; }
         .shop-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-style: italic; background: linear-gradient(to right, #fff, var(--neon-blue)); -webkit-background-clip: text; color: transparent; margin: 0; }
         .user-display-name { color: var(--neon-pink); font-size: 14px; font-weight: bold; margin-top: 2px; }
-
         .slider-wrapper { padding: 8px; border-radius: 30px; border: 2px solid; border-image: linear-gradient(to right, var(--neon-blue), var(--neon-pink)) 1; margin-bottom: 40px; background: rgba(0,0,0,0.5); }
         .slider-container { width: 100%; aspect-ratio: 16/9; border-radius: 22px; overflow: hidden; position: relative; }
         .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
         .slide { width: 100%; height: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
-        
         .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
         .main-card { background: rgba(20, 20, 25, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; align-items: center; backdrop-filter: blur(10px); transition: 0.3s; position: relative; overflow: hidden; height: 220px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .cat-icon-container { width: 100%; height: 140px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); }
@@ -50,7 +41,6 @@
         .card-bottom { width: 100%; height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.6)); z-index: 2; padding-bottom: 10px; }
         .main-card h3 { font-size: 16px; text-align: center; margin: 0 0 8px 0; color: #fff; text-shadow: 0 0 5px var(--neon-blue); }
         .buy-pill { width: 80%; background: linear-gradient(90deg, #00c6ff, #0072ff); border: none; color: white; padding: 8px; border-radius: 50px; font-size: 11px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
-        
         .price-item { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid var(--neon-blue); }
         .admin-input { width: 100%; padding: 15px; margin-bottom: 12px; background: #000; border: 1px solid #444; color: white; border-radius: 15px; box-sizing: border-box; }
         .adm-sec { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; border: 1px solid var(--card-border); }
@@ -246,6 +236,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdmN1cnN3aHJ1ZWZrZ3RydmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3NzQsImV4cCI6MjA4NjU2NDc3NH0.eOR7yiXZi4VK5VtdmN8sh-wZ1loVLVh3EHm7LlRHS5c';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let currentUser = ""; 
         let db = { 
             mlbb: [], pubg: [], heartopia: [], tg: [], 
             accs: [], requests: [], orders: [], balance: 0 
@@ -257,10 +248,12 @@
         let selectedPayment = 'wallet';
 
         function handleLogin() {
-            const user = document.getElementById('user-input').value;
-            if(user.trim() !== "") {
+            const user = document.getElementById('user-input').value.trim();
+            if(user !== "") {
+                currentUser = user;
                 document.getElementById('display-username').innerText = "User: " + user;
                 document.getElementById('login-screen').style.display = 'none';
+                fetchCloudDB(); 
                 nav('main-page');
             } else { alert("Please enter a username"); }
         }
@@ -271,10 +264,10 @@
                 if (data) {
                     data.forEach(row => {
                         if (row.category === 'wallet_requests') db.requests = row.content || [];
-                        else if (row.category === 'user_wallet') db.balance = row.content?.balance || 0;
                         else if (row.category === 'site_settings') settings = { ...settings, ...row.content };
                         else if (row.category === 'site_orders') db.orders = row.content || [];
                         else if (row.category === 'site_accs') db.accs = row.content || [];
+                        else if (row.category === 'wallet_' + currentUser) db.balance = row.content?.balance || 0;
                         else if (db[row.category] !== undefined) db[row.category] = row.content || [];
                     });
                 }
@@ -303,13 +296,6 @@
                 if(sEl && settings['s'+i]) sEl.style.backgroundImage = `url(${settings['s'+i]})`;
             }
 
-            if(document.getElementById('adm-kp-num')) {
-                document.getElementById('adm-kp-num').value = settings.kpayNum || '';
-                document.getElementById('adm-kp-name').value = settings.kpayName || '';
-                document.getElementById('adm-wv-num').value = settings.waveNum || '';
-                document.getElementById('adm-wv-name').value = settings.waveName || '';
-            }
-
             ['mlbb', 'heartopia', 'pubg', 'tg'].forEach(c => {
                 const card = document.getElementById('card-' + c);
                 if(card) {
@@ -324,7 +310,8 @@
                 if(list) list.innerHTML = (db[c] || []).map(i => `<div class="price-item"><span>${i[0]}</span><button class="buy-pill" style="width:auto; padding: 10px 15px;" onclick="openBuyModal('${i[0]}', ${i[1]})">${(i[1] || 0).toLocaleString()} MMK</button></div>`).join('');
             });
 
-            document.getElementById('user-order-history').innerHTML = db.orders.map(o => `
+            const userOrders = db.orders.filter(o => o.username === currentUser);
+            document.getElementById('user-order-history').innerHTML = userOrders.map(o => `
                 <div class="order-card" style="border-right: 4px solid ${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">
                     <p><b>${o.item}</b> - ${(o.price || 0).toLocaleString()} MMK</p>
                     <span style="color:${o.status==='Completed'?'#00ff00':(o.status==='Rejected'?'#ff4444':'yellow')}">${o.status}</span>
@@ -335,25 +322,111 @@
             renderAdminRequests();
         }
 
+        async function submitOrder() {
+            const pid = document.getElementById('p-player-id').value;
+            if(!pid) return alert("Enter Player ID");
+            const btn = document.querySelector("#purchase-modal .buy-pill");
+            btn.disabled = true;
+
+            if(selectedPayment === 'wallet') {
+                if(db.balance < currentOrder.price) {
+                    btn.disabled = false;
+                    return alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
+                }
+                db.balance -= currentOrder.price;
+            }
+
+            db.orders.unshift({ 
+                id: Date.now(), 
+                username: currentUser, 
+                item: currentOrder.name, 
+                price: currentOrder.price, 
+                playerId: pid, 
+                status: 'Pending', 
+                date: new Date().toLocaleString() 
+            });
+
+            await Promise.all([
+                _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }),
+                _supabase.from('kimo_store').upsert({ category: 'wallet_' + currentUser, content: { balance: db.balance } }, { onConflict: 'category' })
+            ]);
+
+            alert("Order Success!");
+            closeBuyModal();
+            renderMain();
+            btn.disabled = false;
+        }
+
+        async function submitTopup() {
+            const amt = parseInt(document.getElementById('topup-amt').value);
+            const fileInput = document.getElementById('topup-file');
+            if(!amt || !fileInput.files[0]) return alert("Fill data");
+
+            const proof = await procImg(fileInput.files[0]);
+            db.requests.unshift({ id: Date.now(), username: currentUser, amt, proof, status: 'Pending', date: new Date().toLocaleString() });
+            
+            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
+            alert("Request Sent!");
+            document.getElementById('topup-modal').style.display = 'none';
+            renderMain();
+        }
+
+        async function approveRequest(i) {
+            const req = db.requests[i];
+            const targetUser = req.username;
+            const { data } = await _supabase.from('kimo_store').select('content').eq('category', 'wallet_' + targetUser).single();
+            let currentBal = data ? (data.content.balance || 0) : 0;
+            let newBal = currentBal + req.amt;
+            db.requests.splice(i, 1);
+            await Promise.all([
+                _supabase.from('kimo_store').upsert({ category: 'wallet_' + targetUser, content: { balance: newBal } }, { onConflict: 'category' }), 
+                _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' })
+            ]);
+            alert("Approved for " + targetUser); 
+            renderMain();
+        }
+
+        function renderAdminRequests() {
+            const reqList = document.getElementById('req-list');
+            if(reqList) reqList.innerHTML = db.requests.map((r, i) => `<div class="order-card"><p><b>${r.username}</b> - ${r.amt.toLocaleString()} MMK</p><button onclick="window.open('${r.proof}')">View Proof</button><br><button onclick="approveRequest(${i})" style="background:var(--neon-blue); color:black; border:none; padding:8px; border-radius:8px; font-weight:bold; margin-top:5px;">Approve</button> <button onclick="rejectRequest(${i})" style="background:#ff4444; color:white; border:none; padding:8px; border-radius:8px;">Reject</button></div>`).join('');
+        }
+        
+        function renderAdminOrders() { 
+            const list = document.getElementById('admin-order-list');
+            if(list) {
+                list.innerHTML = db.orders.filter(o => o.status === 'Pending').map((o, i) => {
+                    return `<div class="order-card"><p><b>User: ${o.username}</b><br>${o.item} (${o.playerId})</p><button onclick="updateOrder(${o.id},'Completed')" style="background:var(--neon-blue); color:black; border:none; padding:8px; border-radius:8px; font-weight:bold;">Done</button> <button onclick="updateOrder(${o.id},'Rejected')" style="background:#ff4444; color:white; border:none; padding:8px; border-radius:8px;">Reject</button></div>`;
+                }).join(''); 
+            }
+        }
+
+        async function updateOrder(id, s) { 
+            const idx = db.orders.findIndex(o => o.id === id);
+            if(idx !== -1) {
+                const order = db.orders[idx];
+                if (s === 'Rejected') {
+                    const targetUser = order.username;
+                    const { data: userRow } = await _supabase.from('kimo_store').select('content').eq('category', 'wallet_' + targetUser).single();
+                    let currentBal = userRow ? (userRow.content.balance || 0) : 0;
+                    let refundBal = currentBal + order.price;
+                    await _supabase.from('kimo_store').upsert({ category: 'wallet_' + targetUser, content: { balance: refundBal } }, { onConflict: 'category' });
+                    if (currentUser === targetUser) db.balance = refundBal;
+                }
+                db.orders[idx].status = s; 
+                await _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }); 
+                alert(s === 'Rejected' ? "Order ငြင်းလိုက်ပါပြီ (User ထံ ပိုက်ဆံပြန်အမ်းပြီး)" : "Order အောင်မြင်ပါသည်");
+                renderMain(); 
+            }
+        }
+
         function renderAccs() {
             const list = document.getElementById('list-acc');
             if(!list) return;
             const unsold = db.accs.filter(a => a && a.title && !a.sold);
             list.innerHTML = unsold.map(a => {
                 const firstImg = Array.isArray(a.imgs) && a.imgs.length > 0 ? a.imgs[0] : '';
-                return `
-                <div class="acc-card">
-                    ${firstImg ? `<img src="${firstImg}" class="acc-img">` : ''}
-                    <div class="acc-body">
-                        <h3>${a.title}</h3>
-                        <div class="acc-price">${a.price.toLocaleString()} MMK</div>
-                        <button class="buy-pill" style="width:100%; margin-top:10px;" onclick="showAccDetails(${a.id})">VIEW DETAILS</button>
-                    </div>
-                </div>`;
+                return `<div class="acc-card">${firstImg ? `<img src="${firstImg}" class="acc-img">` : ''}<div class="acc-body"><h3>${a.title}</h3><div class="acc-price">${a.price.toLocaleString()} MMK</div><button class="buy-pill" style="width:100%; margin-top:10px;" onclick="showAccDetails(${a.id})">VIEW DETAILS</button></div></div>`;
             }).join('') || '<p style="text-align:center; padding:20px; opacity:0.5;">No Stock</p>';
-            
-            const admList = document.getElementById('admin-acc-list');
-            if(admList) admList.innerHTML = db.accs.map((a, i) => `<div class="price-item"><span>${a.title} ${a.sold ? '(SOLD)' : ''}</span><button class="del-btn" onclick="delAcc(${i})">Del</button></div>`).join('');
         }
 
         function showAccDetails(id) {
@@ -369,222 +442,22 @@
             document.getElementById('acc-details-modal').style.display='block';
         }
 
-        async function postAcc() {
-            const title = document.getElementById('a-title').value;
-            const price = parseInt(document.getElementById('a-price').value);
-            const files = document.getElementById('a-imgs').files;
-            if(!title || !price) return alert("Fill Name and Price");
-            let imgList = [];
-            for(let f of files) { imgList.push(await procImg(f)); }
-            db.accs.push({ id: Date.now(), title, desc: document.getElementById('a-desc').value, price, imgs: imgList, sold: false });
-            await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' });
-            alert("Posted!"); renderAccs();
-        }
-
-        async function delAcc(i) {
-            if(confirm("Delete?")) { db.accs.splice(i, 1); await _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' }); renderAccs(); }
-        }
-
-        const procImg = f => new Promise(res => { const r = new FileReader(); r.readAsDataURL(f); r.onload = e => res(e.target.result); });
-        
-        function nav(id) { 
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); 
-            document.getElementById(id).classList.add('active-page'); 
-            if(document.getElementById('d-menu').classList.contains('open')) toggleDrawer(); 
-            window.scrollTo(0,0);
-        }
-
+        async function rejectRequest(i) { db.requests.splice(i, 1); await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' }); renderMain(); }
+        function nav(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page')); document.getElementById(id).classList.add('active-page'); if(document.getElementById('d-menu').classList.contains('open')) toggleDrawer(); window.scrollTo(0,0); }
         function toggleDrawer() { document.getElementById('d-menu').classList.toggle('open'); document.getElementById('d-overlay').style.display = document.getElementById('d-menu').classList.contains('open') ? 'block' : 'none'; }
-        
-        function openBuyModal(name, price, accId = null) { 
-            currentOrder = { name, price, accId }; 
-            document.getElementById('p-item-name').innerText = name; 
-            document.getElementById('p-item-price').innerText = price.toLocaleString() + ' MMK'; 
-            document.getElementById('modal-balance').innerText = (db.balance || 0).toLocaleString(); 
-            document.getElementById('purchase-modal').style.display = 'block'; 
-            selectPay('wallet'); 
-        }
-        
+        function openBuyModal(name, price, accId = null) { currentOrder = { name, price, accId }; document.getElementById('p-item-name').innerText = name; document.getElementById('p-item-price').innerText = price.toLocaleString() + ' MMK'; document.getElementById('modal-balance').innerText = (db.balance || 0).toLocaleString(); document.getElementById('purchase-modal').style.display = 'block'; selectPay('wallet'); }
         function closeBuyModal() { document.getElementById('purchase-modal').style.display = 'none'; }
-        
-        function selectPay(m) { 
-            selectedPayment = m; 
-            document.getElementById('opt-wallet').classList.toggle('selected', m==='wallet'); 
-            document.getElementById('opt-direct').classList.toggle('selected', m==='direct'); 
-            document.getElementById('info-direct').style.display = m === 'direct' ? 'block' : 'none'; 
-        }
-        
-        async function submitOrder() {
-            const pid = document.getElementById('p-player-id').value;
-            if(!pid) return alert("Enter Player ID");
-
-            const btn = document.querySelector("#purchase-modal .buy-pill");
-            const oldTxt = btn.innerText;
-            btn.innerText = "SENDING...";
-            btn.disabled = true;
-
-            let proof = null;
-            if(selectedPayment === 'wallet') {
-                if(db.balance < currentOrder.price) {
-                    btn.innerText = oldTxt; btn.disabled = false;
-                    return alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
-                }
-                db.balance -= currentOrder.price;
-            } else {
-                const f = document.getElementById('p-proof-img').files[0];
-                if(!f) {
-                    btn.innerText = oldTxt; btn.disabled = false;
-                    return alert("Screenshot တင်ပေးပါ");
-                }
-                proof = await procImg(f);
-            }
-
-            if(currentOrder.accId) {
-                const acc = db.accs.find(a => a.id === currentOrder.accId);
-                if(acc) acc.sold = true;
-            }
-
-            db.orders.unshift({ id: Date.now(), item: currentOrder.name, price: currentOrder.price, playerId: pid, status: 'Pending', proof, date: new Date().toLocaleString() });
-
-            try {
-                await Promise.all([
-                    _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }),
-                    _supabase.from('kimo_store').upsert({ category: 'user_wallet', content: { balance: db.balance } }, { onConflict: 'category' }),
-                    _supabase.from('kimo_store').upsert({ category: 'site_accs', content: db.accs }, { onConflict: 'category' })
-                ]);
-                alert("Order တင်ခြင်း အောင်မြင်ပါသည်။");
-                closeBuyModal();
-                renderMain(); 
-            } catch(e) {
-                alert("Database Error! နောက်မှ ပြန်ကြိုးစားပါ။");
-            } finally {
-                btn.innerText = oldTxt; btn.disabled = false;
-            }
-        }
-
-        async function submitTopup() {
-            const amt = parseInt(document.getElementById('topup-amt').value);
-            const fileInput = document.getElementById('topup-file');
-            
-            if(!amt || !fileInput.files[0]) return alert("ပမာဏနှင့် Screenshot ထည့်ပေးပါ");
-
-            const btn = document.getElementById('topup-submit-btn');
-            const oldTxt = btn.innerText;
-            btn.innerText = "UPLOADING...";
-            btn.disabled = true;
-
-            try {
-                const proof = await procImg(fileInput.files[0]);
-                db.requests.unshift({ id: Date.now(), amt, proof, status: 'Pending', date: new Date().toLocaleString() });
-                
-                await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
-                
-                alert("ငွေဖြည့်သွင်းမှု တင်ပြပြီးပါပြီ။ Admin အတည်ပြုပေးရန် စောင့်ဆိုင်းပေးပါ။");
-                document.getElementById('topup-modal').style.display = 'none';
-                renderMain();
-            } catch(e) {
-                alert("Error: ငွေဖြည့်၍ မရပါ");
-            } finally {
-                btn.innerText = oldTxt;
-                btn.disabled = false;
-            }
-        }
-
-        function switchAdm(el, id) {
-            document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-            ['requests', 'orders', 'prices', 'acc', 'visuals'].forEach(s=>document.getElementById('adm-'+s).style.display='none');
-            document.getElementById('adm-'+id).style.display='block';
-            if(id==='prices') renderPriceEdit();
-        }
-
-        function renderPriceEdit() { 
-            const container = document.getElementById('price-edit-area');
-            container.innerHTML = ''; 
-            (db[currCat] || []).forEach((item, index) => { 
-                container.innerHTML += `<div class="price-edit-row"><input type="text" value="${item[0]}" id="p-name-${index}"><input type="number" value="${item[1]}" id="p-price-${index}"><button class="del-btn" onclick="db['${currCat}'].splice(${index},1);renderPriceEdit()">X</button></div>`; 
-            }); 
-        }
-
+        function selectPay(m) { selectedPayment = m; document.getElementById('opt-wallet').classList.toggle('selected', m==='wallet'); document.getElementById('opt-direct').classList.toggle('selected', m==='direct'); document.getElementById('info-direct').style.display = m === 'direct' ? 'block' : 'none'; }
+        const procImg = f => new Promise(res => { const r = new FileReader(); r.readAsDataURL(f); r.onload = e => res(e.target.result); });
+        function switchAdm(el, id) { document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); ['requests', 'orders', 'prices', 'acc', 'visuals'].forEach(s=>document.getElementById('adm-'+s).style.display='none'); document.getElementById('adm-'+id).style.display='block'; if(id==='prices') renderPriceEdit(); }
+        function renderPriceEdit() { const container = document.getElementById('price-edit-area'); container.innerHTML = ''; (db[currCat] || []).forEach((item, index) => { container.innerHTML += `<div class="price-edit-row"><input type="text" value="${item[0]}" id="p-name-${index}"><input type="number" value="${item[1]}" id="p-price-${index}"><button class="del-btn" onclick="db['${currCat}'].splice(${index},1);renderPriceEdit()">X</button></div>`; }); }
         function addItem() { db[currCat].push(["New Item", 0]); renderPriceEdit(); }
-
-        async function savePrices() { 
-            const rows = document.querySelectorAll('.price-edit-row'); 
-            let newData = []; 
-            rows.forEach((row, i) => { newData.push([document.getElementById(`p-name-${i}`).value, parseInt(document.getElementById(`p-price-${i}`).value)]); }); 
-            db[currCat] = newData; 
-            await _supabase.from('kimo_store').upsert({ category: currCat, content: newData }, { onConflict: 'category' }); 
-            alert("Saved!"); renderMain(); 
-        }
-
-        async function saveVisuals() { 
-            settings.kpayNum = document.getElementById('adm-kp-num').value; 
-            settings.kpayName = document.getElementById('adm-kp-name').value;
-            settings.waveNum = document.getElementById('adm-wv-num').value; 
-            settings.waveName = document.getElementById('adm-wv-name').value;
-            const fileIds = { bg:'adm-bg', logo:'adm-logo', s0:'adm-s0', s1:'adm-s1', s2:'adm-s2', icon_mlbb:'adm-icon-mlbb', icon_pubg:'adm-icon-pubg', icon_heartopia:'adm-icon-heartopia', icon_tg:'adm-icon-tg' };
-            for (let key in fileIds) { 
-                const input = document.getElementById(fileIds[key]);
-                if(input && input.files[0]) settings[key] = await procImg(input.files[0]);
-            }
-            await _supabase.from('kimo_store').upsert({ category: 'site_settings', content: settings }, { onConflict: 'category' }); 
-            alert("Settings saved!"); renderMain();
-        }
-
-        function renderAdminOrders() { 
-            const list = document.getElementById('admin-order-list');
-            if(list) {
-                list.innerHTML = db.orders.filter(o => o.status === 'Pending').map((o, i) => {
-                    const orderTxt = `KIMO SHOP ORDER:\nItem: ${o.item}\nPrice: ${o.price}\nPlayer ID: ${o.playerId}`;
-                    const tgLink = `https://t.me/share/url?url=${encodeURIComponent(orderTxt)}`;
-                    return `<div class="order-card">
-                        <p><b>${o.item}</b> (${o.playerId})</p>
-                        ${o.proof ? `<button onclick="window.open('${o.proof}')" style="background:#444; color:white; border:none; padding:5px; border-radius:5px; margin-bottom:10px;">View Screenshot</button>` : ''}
-                        <div style="display:flex; gap:10px;">
-                            <button onclick="updateOrder(${o.id},'Completed')" style="background:var(--neon-blue); color:black; border:none; padding:8px; border-radius:8px; font-weight:bold;">Done</button>
-                            <button onclick="updateOrder(${o.id},'Rejected')" style="background:#ff4444; color:white; border:none; padding:8px; border-radius:8px;">Reject</button>
-                            <a href="${tgLink}" target="_blank" style="background:#24A1DE; color:white; padding:8px; border-radius:8px; text-decoration:none; font-size:12px; display:flex; align-items:center;">🚀 Reseller</a>
-                        </div>
-                    </div>`;
-                }).join(''); 
-            }
-        }
-
-        async function updateOrder(id, s) { 
-            const idx = db.orders.findIndex(o => o.id === id);
-            if(idx !== -1) {
-                db.orders[idx].status = s; 
-                await _supabase.from('kimo_store').upsert({ category: 'site_orders', content: db.orders }, { onConflict: 'category' }); 
-                renderMain(); 
-            }
-        }
-
-        function renderAdminRequests() {
-            const reqList = document.getElementById('req-list');
-            if(reqList) reqList.innerHTML = db.requests.map((r, i) => `<div class="order-card"><p><b>${r.amt.toLocaleString()} MMK</b></p><button onclick="window.open('${r.proof}')" style="margin-bottom:10px;">View Proof</button><br><button onclick="approveRequest(${i})" style="background:var(--neon-blue); color:black; border:none; padding:8px; border-radius:8px; font-weight:bold;">Approve</button> <button onclick="rejectRequest(${i})" style="background:#ff4444; color:white; border:none; padding:8px; border-radius:8px;">Reject</button></div>`).join('');
-        }
-
-        async function approveRequest(i) {
-            db.balance += db.requests[i].amt; 
-            db.requests.splice(i, 1);
-            await Promise.all([
-                _supabase.from('kimo_store').upsert({ category: 'user_wallet', content: { balance: db.balance } }, { onConflict: 'category' }), 
-                _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' })
-            ]);
-            alert("ငွေဖြည့်သွင်းမှု အတည်ပြုပြီးပါပြီ"); 
-            renderMain();
-        }
-
-        async function rejectRequest(i) {
-            db.requests.splice(i, 1);
-            await _supabase.from('kimo_store').upsert({ category: 'wallet_requests', content: db.requests }, { onConflict: 'category' });
-            alert("Rejected!");
-            renderMain();
-        }
-
+        async function savePrices() { const rows = document.querySelectorAll('.price-edit-row'); let newData = []; rows.forEach((row, i) => { newData.push([document.getElementById(`p-name-${i}`).value, parseInt(document.getElementById(`p-price-${i}`).value)]); }); db[currCat] = newData; await _supabase.from('kimo_store').upsert({ category: currCat, content: newData }, { onConflict: 'category' }); alert("Saved!"); renderMain(); }
+        async function saveVisuals() { settings.kpayNum = document.getElementById('adm-kp-num').value; settings.kpayName = document.getElementById('adm-kp-name').value; settings.waveNum = document.getElementById('adm-wv-num').value; settings.waveName = document.getElementById('adm-wv-name').value; const fileIds = { bg:'adm-bg', logo:'adm-logo', s0:'adm-s0', s1:'adm-s1', s2:'adm-s2', icon_mlbb:'adm-icon-mlbb', icon_pubg:'adm-icon-pubg', icon_heartopia:'adm-icon-heartopia', icon_tg:'adm-icon-tg' }; for (let key in fileIds) { const input = document.getElementById(fileIds[key]); if(input && input.files[0]) settings[key] = await procImg(input.files[0]); } await _supabase.from('kimo_store').upsert({ category: 'site_settings', content: settings }, { onConflict: 'category' }); alert("Settings saved!"); renderMain(); }
         function drawerLogin() { if(prompt("Pass:")==="kimo1500") nav('admin-page'); }
         function logoClick() { logoTapCount++; if(logoTapCount == 5) drawerLogin(); setTimeout(() => logoTapCount = 0, 2000); }
         function startSlider() { let i=0; setInterval(()=>{ i=(i+1)%3; if(document.getElementById('slide-track')) document.getElementById('slide-track').style.transform=`translateX(-${i*33.333}%)`; }, 5000); }
-        window.onload = () => { setTimeout(() => { document.getElementById('loader').style.display='none'; fetchCloudDB(); startSlider(); }, 1200); };
+        window.onload = () => { setTimeout(() => { document.getElementById('loader').style.display='none'; startSlider(); }, 1200); };
     </script>
 </body>
 </html>
